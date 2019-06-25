@@ -8,15 +8,12 @@ extern crate stdweb;
 extern crate core;
 
 mod logging;
-mod creep_manager;
-
-static mut GLOBAL_INIT_FLAG: bool = false;
-static mut GLOBAL_INIT_NUMBERS: i32 = 0;
-
+//mod screeps_ai;
 
 fn main() {
     stdweb::initialize();
     logging::setup_logging(logging::Info);
+//    screeps_ai::SuperAI::init_global_ai();
 
     js! {
         var game_loop = @{game_loop};
@@ -41,23 +38,10 @@ fn main() {
 }
 
 fn game_loop() {
+    info!("in loop");
     let start_cpu = screeps::game::cpu::get_used();
 
-    let cp_manager = creep_manager::get_manager();
-
-    unsafe {
-        if ! GLOBAL_INIT_FLAG {
-            GLOBAL_INIT_NUMBERS +=1;
-            info!("init cache data! times: {}", GLOBAL_INIT_NUMBERS);
-            if cp_manager.init() == 0{
-                GLOBAL_INIT_FLAG = true;
-            }
-            return;
-        }
-    }
-
-    cp_manager.check_create_creep();
-    cp_manager.creep_do_work();
+//    screeps_ai::SuperAI::run_once();
 
     info!("start cpu: {}, end cpu: {}",start_cpu, screeps::game::cpu::get_used())
 }

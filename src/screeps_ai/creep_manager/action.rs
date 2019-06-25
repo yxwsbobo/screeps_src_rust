@@ -1,11 +1,10 @@
-use creep_manager::Manager;
+use super::Manager;
 
 use screeps::{find, prelude::*, ReturnCode, RoomObjectProperties};
 
 impl Manager {
-    pub fn action_init(&self) ->i32{
-
-        0
+    pub fn action_init(&self) ->bool{
+        true
     }
 
     pub fn creep_do_work(&mut self){

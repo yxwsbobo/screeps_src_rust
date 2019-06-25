@@ -1,20 +1,28 @@
-use creep_manager::{Manager,NORMAL_CREEP_BODY_INFO};
+use super::{Manager,NORMAL_CREEP_BODY_INFO};
 
-use screeps::{prelude::*, ReturnCode};
+use screeps::{find, prelude::*, ReturnCode};
 use std::collections::HashSet;
 
 impl Manager {
-    pub fn generator_init(&self)-> i32{
+    pub fn generator_init(&self)-> bool{
         self.update_creep_number();
-        0
+        true
     }
 
     fn update_creep_number(&self){
+        let rooms:&Vec<screeps::objects::Room> = &screeps::game::rooms::values();
+        for room in rooms{
+            let sources:&Vec<screeps::objects::Source> = &room.find(find::SOURCES);
+            for source in sources{
+                let closest_spawn = source.pos().find_closest_by_range(find::MY_SPAWNS).unwrap().name();
 
+                info!("source name: {}, spawn name:{}",source.id(), closest_spawn);
+            }
+        }
     }
 
-    fn get_my_spawns(&self){
-
+    fn get_my_spawns(&self)-> Vec<screeps::objects::StructureSpawn>{
+        screeps::game::spawns::values()
     }
 
     fn cleanup_memory(&self) -> Result<(), Box<dyn(::std::error::Error)>> {
@@ -39,9 +47,7 @@ impl Manager {
     }
 
     fn check_clean_memory(&self){
-        let time = screeps::game::time();
-
-        if time % 32 == 3 {
+        if screeps::game::time() % 32 == 3 {
             info!("running memory cleanup");
             self.cleanup_memory().expect("expected Memory.creeps format to be a regular memory object");
         }
@@ -51,8 +57,7 @@ impl Manager {
         self.check_clean_memory();
         let body_info = &NORMAL_CREEP_BODY_INFO[self.level];
 
-        for spawn in screeps::game::spawns::values() {
-            let spawn: &screeps::objects::StructureSpawn = &spawn;
+        for spawn in self.get_my_spawns() {
 
             if spawn.energy() >=body_info.1 {
                 // create a unique name, spawn.
