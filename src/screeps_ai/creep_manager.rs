@@ -1,36 +1,102 @@
 
 mod generator;
 mod action;
+mod data_control;
 
 use screeps::{Part};
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap, HashSet};
 
-struct WorkerInfo{
-    target:String
-}
-
-struct StructureInfo{
-    worker_number:usize,
-    worker_max:usize,
-    source_id:String,
+#[derive(Debug)]
+enum ScreepsObjectType{
+    Spawn,
+    Creep,
+    PowerCreep,
+    Source,
+    Mineral,
+    Controller,
+    ConstructedWall,
+    Extension,
+    Link,
+    Storage,
+    Tower,
+    Observer,
+    PowerSpawn,
+    PowerBank,
+    Lab,
+    Terminal,
+    Nuker,
 }
 
 #[derive(Debug)]
+struct ObjectBasicInfo{
+    obj_type:ScreepsObjectType,
+    name:String,
+    id:String,
+}
+
+struct PointToPointWorkInfo{
+    source:ObjectBasicInfo,
+    target:ObjectBasicInfo
+}
+
+enum WorkerState{
+    StupidWorker,
+//    MoveToSource,
+    DoSourceWork,
+//    MoveToTarget,
+    DoTargetWork,
+}
+
+struct WorkerInfo{
+    sr_info:PointToPointWorkInfo,
+    state:WorkerState,
+}
+
+enum ObjectEmployType{
+    //Type, name, id
+    PointToPoint(PointToPointWorkInfo),
+    CleanRoom,
+//    SpawnEmploy(String),
+//    ControllerEmploy(String),
+//    ExtensionEmploy(String),
+//    StorageEmploy(String),
+//    TowerEmploy(String),
+//    PowerSpawnEmploy(String),
+//    PowerBankEmploy(String),
+//    LabEmploy(String),
+}
+
+struct ObjectEmployInfo{
+    nothing_to_do:bool,
+    worker:HashSet<String>,
+    at_least_number:usize,
+    normal_number:usize,
+    max_number:usize,
+    employ_type:ObjectEmployType,
+    flag:Option<String>,
+}
+
+
+#[derive(Debug)]
 struct EnergySourceInfo{
-    worker_number:usize,
+    current_number:usize,
     worker_max:usize,
+    last_energy:usize,
+    basic_info:ObjectBasicInfo,
     spawn_name:String,
 }
 
 pub struct Manager {
-    worker_count:usize,
-    worker_max:usize,
     level:usize,
-//    building_info:HashMap<String,StructureInfo>,
-    controller_info:HashMap<String,StructureInfo>,
-    storage_info:HashMap<String,StructureInfo>,
-    source_info:HashMap<String,EnergySourceInfo>,
-    worker_info:HashMap<String,WorkerInfo>,
+
+    //key is id,
+    sources_info:HashMap<String,EnergySourceInfo>,
+    workers_info:HashMap<String,WorkerInfo>,
+
+    office_list:BTreeMap<i32,HashSet<ObjectEmployInfo>>,
+
+    //BTreeMap<i32,String> cost,id
+    cost_to_source:HashMap<String,BTreeMap<i32,String>>,
 }
 
 const NORMAL_CREEP_BODY:([Part;4],[Part;6]) = (
@@ -47,12 +113,10 @@ impl Manager {
     pub fn new() -> Manager{
         Manager{
             level:0,
-            worker_count:0,
-            worker_max:0,
-            controller_info:HashMap::new(),
-            storage_info:HashMap::new(),
-            source_info:HashMap::new(),
-            worker_info:HashMap::new(),
+            sources_info:HashMap::new(),
+            workers_info:HashMap::new(),
+            office_list:BTreeMap::new(),
+            cost_to_source:HashMap::new(),
         }
     }
 

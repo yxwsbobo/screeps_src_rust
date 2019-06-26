@@ -6,4 +6,7 @@ mod ai_interface;
 pub struct SuperAI{
     init_flag:bool,
     cp_manager:creep_manager::Manager,
+
 }
+
+//fn pool_calculate_range()
