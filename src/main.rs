@@ -5,15 +5,14 @@ extern crate log;
 extern crate screeps;
 #[macro_use]
 extern crate stdweb;
-extern crate core;
 
 mod logging;
-//mod screeps_ai;
+mod screeps_ai;
 
 fn main() {
     stdweb::initialize();
     logging::setup_logging(logging::Info);
-//    screeps_ai::SuperAI::init_global_ai();
+    screeps_ai::SuperAI::init_global_ai();
 
     js! {
         var game_loop = @{game_loop};
@@ -41,7 +40,7 @@ fn game_loop() {
     info!("in loop");
     let start_cpu = screeps::game::cpu::get_used();
 
-//    screeps_ai::SuperAI::run_once();
+    screeps_ai::SuperAI::run_once();
 
     info!("start cpu: {}, end cpu: {}",start_cpu, screeps::game::cpu::get_used())
 }
