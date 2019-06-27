@@ -1,11 +1,13 @@
 use screeps_ai::object_manager::{Manager, ObjectBasicInfo, ScreepsObjectType};
 use std::collections::HashMap;
-use screeps::{find, HasPosition};
+use screeps::{find, HasPosition,HasId};
 
 impl Manager {
     pub fn new() -> Manager {
         Manager {
             objects:HashMap::new(),
+//            cost_to_source:HashMap::new(),
+
         }
     }
 
@@ -40,7 +42,7 @@ impl Manager {
                     self.objects.insert(id.clone(),ObjectBasicInfo {
                         obj_type: super::ScreepsObjectType::Source,
                         id: id.clone(),
-                        name: id().clone(),
+                        name: id.clone(),
                         pos: super::Position {
                             x: pos.x(),
                             y: pos.y(),
@@ -83,5 +85,12 @@ impl Manager {
     pub fn get_object(&self, id:&str)->&ObjectBasicInfo{
         //Todo add on not exist
         self.objects.get(id).unwrap()
+    }
+}
+
+
+impl ObjectBasicInfo{
+    pub fn pool_diff_range(&self, target:&ObjectBasicInfo)->u32{
+        self.pos.range_to(&target.pos)
     }
 }

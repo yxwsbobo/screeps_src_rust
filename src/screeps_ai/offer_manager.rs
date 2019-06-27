@@ -1,8 +1,11 @@
 mod offer_interface;
+mod data_control;
+mod action;
+mod default_offer;
 
-use std::collections::HashSet;
+use std::collections::{HashSet, BTreeMap, HashMap};
 
-#[derive(Clone)]
+#[derive(Debug,Clone)]
 struct PointToPointWorkInfo{
     source:String,
     target:String
@@ -17,40 +20,33 @@ enum WorkerState{
     DoTargetWork,
 }
 
-#[derive(Clone)]
+#[derive(Debug,Clone)]
 enum WorkType{
-    _UnKnown,
+    UnKnown,
     PointToPoint(PointToPointWorkInfo),
     CleanRoom,
 }
 
 #[derive(Clone)]
-struct WorkerInfo{
+pub(crate) struct WorkerInfo{
     info:WorkType,
     state:WorkerState,
 }
 
 #[derive(Clone)]
-struct ObjectEmployInfo{
+struct GroupEmployInfo{
     nothing_to_do:bool,
-    worker:HashSet<String>,
+    workers:HashSet<String>,
     at_least_number:usize,
     normal_number:usize,
     max_number:usize,
-    employ_type:ObjectEmployType,
+    offer_type:WorkType,
     flag:Option<String>,
 }
 
 
-#[derive(Debug,Clone)]
-struct EnergySourceInfo{
-    id:String,
-    current_number:usize,
-    worker_max:usize,
-    last_energy:usize,
-    spawn_name:String,
-}
-
 pub struct Manager{
+    office_list:BTreeMap<i32,HashMap<String,GroupEmployInfo>>,
+    workers_info:HashMap<String,WorkerInfo>,
 
 }

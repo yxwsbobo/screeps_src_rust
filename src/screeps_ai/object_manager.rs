@@ -26,7 +26,7 @@ enum ScreepsObjectType{
 }
 
 #[derive(Debug, Clone)]
-struct ObjectBasicInfo{
+pub struct ObjectBasicInfo{
     obj_type:ScreepsObjectType,
     name:String,
     id:String,
@@ -36,4 +36,8 @@ struct ObjectBasicInfo{
 
 pub struct Manager {
     objects:HashMap<String,ObjectBasicInfo>,
+
+
+    //BTreeMap<i32,String> cost,id
+//    cost_to_source:HashMap<String,BTreeMap<i32,String>>,
 }

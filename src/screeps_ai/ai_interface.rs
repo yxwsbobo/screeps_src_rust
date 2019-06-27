@@ -19,8 +19,12 @@ impl SuperAI {
     }
 
     pub fn run_once(){
+        SuperAI::get_ai().ai_run_once();
+    }
+
+    pub fn get_ai() ->&'static mut SuperAI{
         unsafe {
-            GLOBAL_AI_CACHE.as_mut().unwrap().ai_run_once();
+            GLOBAL_AI_CACHE.as_mut().unwrap()
         }
     }
 }

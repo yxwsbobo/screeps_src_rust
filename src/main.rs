@@ -11,10 +11,19 @@ extern crate core;
 mod logging;
 mod screeps_ai;
 
+fn my_test_call(){
+
+}
+
 fn main() {
     stdweb::initialize();
     logging::setup_logging(logging::Info);
     screeps_ai::SuperAI::init_global_ai();
+
+    js!{
+        var my_test_call = @{my_test_call};
+        var my_test_value = 5;
+    }
 
     js! {
         var game_loop = @{game_loop};
@@ -40,7 +49,7 @@ fn main() {
 
 fn game_loop() {
 //    info!("in loop");
-    let start_cpu = screeps::game::cpu::get_used();
+//    let start_cpu = screeps::game::cpu::get_used();
 
     screeps_ai::SuperAI::run_once();
 

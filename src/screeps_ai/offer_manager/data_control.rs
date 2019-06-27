@@ -1,5 +1,6 @@
-use screeps_ai::creep_manager::{Manager, ObjectEmployInfo};
+
 use std::collections::HashSet;
+use screeps_ai::offer_manager::{Manager, GroupEmployInfo, WorkType};
 
 impl Manager {
     pub fn delete_deploy_info_use_flag(&mut self,flag:String){
@@ -13,22 +14,23 @@ impl Manager {
 //    pub fn
 }
 
-impl ObjectEmployInfo {
-    pub fn new() -> ObjectEmployInfo{
-        ObjectEmployInfo{
+impl GroupEmployInfo {
+    pub fn new() -> GroupEmployInfo{
+        GroupEmployInfo{
             nothing_to_do:false,
-            worker:HashSet::new(),
+            workers:HashSet::new(),
             at_least_number:0,
             normal_number:2,
             max_number:4,
-            employ_type:super::ObjectEmployType::Unknown,
+            offer_type:WorkType::UnKnown,
             flag:None,
+        }
+    }
+
+    pub fn turn_back_workers(&mut self){
+        for worker in &self.workers {
+
         }
     }
 }
 
-impl ObjectBasicInfo{
-    pub fn pool_diff_range(&self, target:&ObjectBasicInfo)->u32{
-        pool_calculate_range(&self.pos, &target.pos)
-    }
-}

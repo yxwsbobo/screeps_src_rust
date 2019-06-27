@@ -16,6 +16,7 @@ impl SuperAI {
         if !self.check_run_init(){ return; }
 
         self.cp_manager.check_create_creep();
-        self.cp_manager.creep_do_work();
+        self.offer_mgr.creep_do_work();
+
     }
 }
