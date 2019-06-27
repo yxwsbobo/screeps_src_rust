@@ -111,6 +111,9 @@ impl Manager {
 
     pub fn pause_group_offer(&mut self, id:&str){
         self.each_target_offer_do(id, |offer|{
+            if offer.pausing{
+                return true;
+            }
             offer.pausing = true;
             for name in &offer.workers {
                 let worker = get_offer_manager().workers_info.get_mut(name)

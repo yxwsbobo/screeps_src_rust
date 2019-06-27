@@ -29,7 +29,7 @@ impl Manager {
     fn init_source_info(&mut self) {
         let rooms: &Vec<screeps::objects::Room> = &screeps::game::rooms::values();
         for room in rooms {
-            let mut worker_max = 6;
+            let mut worker_max = 5;
             let sources: &Vec<screeps::objects::Source> = &room.find(find::SOURCES);
             for source in sources {
                 self.insert_source(source, worker_max);
@@ -67,13 +67,14 @@ impl Manager {
     }
 
     fn is_need_workers(&self) ->bool{
-        for (_, info) in &self.sources_info {
-            if info.current_number < info.worker_max{
-                return true;
-            }
-        }
-
-        false
+        get_offer_manager().workers_info.len() <22
+//        for (_, info) in &self.sources_info {
+//            if info.current_number < info.worker_max{
+//                return true;
+//            }
+//        }
+//
+//        false
     }
 
     pub fn check_create_creep(&mut self) {

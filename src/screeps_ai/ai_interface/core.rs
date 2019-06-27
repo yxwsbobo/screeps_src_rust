@@ -42,8 +42,8 @@ impl SuperAI {
     pub(crate) fn ai_run_once(&mut self){
         if !self.check_run_init(){ return; }
 
-        self.cp_manager.check_create_creep();
         self.offer_mgr.creep_do_work();
+        self.cp_manager.check_create_creep();
 
     }
 }

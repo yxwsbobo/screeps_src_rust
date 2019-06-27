@@ -28,7 +28,7 @@ enum WorkType{
 }
 
 #[derive(Clone)]
-pub(crate) struct WorkerInfo{
+pub struct WorkerInfo{
     info:WorkType,
     state:WorkerState,
     offer_level:i32,
@@ -48,6 +48,6 @@ struct GroupEmployInfo{
 
 pub struct Manager{
     offer_list:BTreeMap<i32,HashMap<String,GroupEmployInfo>>,
-    workers_info:HashMap<String,WorkerInfo>,
+    pub workers_info:HashMap<String,WorkerInfo>,
 
 }

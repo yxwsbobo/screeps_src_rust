@@ -45,7 +45,7 @@ impl Manager {
         let mut offers:HashMap<String,GroupEmployInfo> = HashMap::new();
 
         for spawn in &object_manager::Manager::get_my_spawns() {
-            self.add_offer_info(offers.borrow_mut(), spawn.id(), (1, 2, 3), (0, 6, 8));
+            self.add_offer_info(offers.borrow_mut(), spawn.id(), (1, 2, 3), (0, 6, 9));
         }
 
         self.offer_list.insert(1, offers);
