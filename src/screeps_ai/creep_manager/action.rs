@@ -1,10 +1,17 @@
 use super::Manager;
 
-use screeps::{find, prelude::*, ReturnCode, RoomObjectProperties};
-use screeps_ai::creep_manager::{WorkerState, WorkerInfo, ScreepsObjectType};
+use screeps::{ prelude::*, ReturnCode};
 
 impl Manager {
+    fn init_workers(&mut self){
+        for creep in screeps::game::creeps::values() {
+            self.born_init_creep(&creep.name())
+        }
+    }
+
     pub fn action_init(&mut self) ->bool{
+        self.init_workers();
+
         true
     }
 

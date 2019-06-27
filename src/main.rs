@@ -5,6 +5,8 @@ extern crate log;
 extern crate screeps;
 #[macro_use]
 extern crate stdweb;
+extern crate core;
+
 
 mod logging;
 mod screeps_ai;
@@ -37,12 +39,12 @@ fn main() {
 }
 
 fn game_loop() {
-    info!("in loop");
+//    info!("in loop");
     let start_cpu = screeps::game::cpu::get_used();
 
     screeps_ai::SuperAI::run_once();
 
-    info!("start cpu: {}, end cpu: {}",start_cpu, screeps::game::cpu::get_used())
+//    info!("start cpu: {}, end cpu: {}",start_cpu, screeps::game::cpu::get_used())
 }
 
 

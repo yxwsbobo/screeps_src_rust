@@ -1,4 +1,6 @@
-use screeps_ai::{SuperAI, creep_manager};
+mod core;
+
+use screeps_ai::{SuperAI, creep_manager, object_manager, offer_manager};
 
 static mut GLOBAL_AI_CACHE:Option<SuperAI> = None;
 
@@ -8,7 +10,9 @@ impl SuperAI {
             if let None = GLOBAL_AI_CACHE {
                 GLOBAL_AI_CACHE = Some(SuperAI{
                     init_flag:false,
-                    cp_manager: creep_manager::Manager::new()
+                    cp_manager: creep_manager::Manager::new(),
+                    obj_manager:object_manager::Manager::new(),
+                    offer_mgr: offer_manager::Manager::new(),
                 })
             }
         }
@@ -19,23 +23,4 @@ impl SuperAI {
             GLOBAL_AI_CACHE.as_mut().unwrap().ai_run_once();
         }
     }
-
-    fn check_run_init(&mut self)->bool{
-        if self.init_flag{
-            return true;
-        }
-        self.init_flag = self.cp_manager.init();
-
-        false
-    }
-
-    fn ai_run_once(&mut self){
-        if !self.check_run_init(){
-            return;
-        }
-
-        self.cp_manager.check_create_creep();
-        self.cp_manager.creep_do_work();
-    }
-
 }
