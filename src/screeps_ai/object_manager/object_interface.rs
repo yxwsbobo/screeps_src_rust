@@ -3,6 +3,10 @@ use std::collections::HashMap;
 use screeps::{find, HasPosition,HasId};
 
 impl Manager {
+    pub fn get_my_spawns() -> Vec<screeps::objects::StructureSpawn> {
+        screeps::game::spawns::values()
+    }
+
     pub fn new() -> Manager {
         Manager {
             objects:HashMap::new(),
@@ -71,9 +75,27 @@ impl Manager {
         }
     }
 
+    pub fn init_objects_constructions(&mut self){
+        for construction in &screeps::game::construction_sites::values() {
+            let pos = &construction.pos();
+            let id = construction.id();
+
+            self.objects.insert(id.clone(),ObjectBasicInfo {
+                obj_type: ScreepsObjectType::ConstructionSites,
+                name: id.clone(),
+                id,
+                pos: super::Position {
+                    x: pos.x(),
+                    y: pos.y(),
+                },
+            });
+        }
+    }
+
     pub fn init(&mut self) -> bool{
         self.init_objects_in_room();
         self.init_objects_spawns();
+        self.init_objects_constructions();
 
         true
     }

@@ -4,7 +4,7 @@ use std::collections::HashMap;
 mod object_interface;
 
 #[derive(Debug,Clone)]
-enum ScreepsObjectType{
+pub enum ScreepsObjectType{
     Unknown,
     Spawn,
     Creep,
@@ -12,6 +12,7 @@ enum ScreepsObjectType{
     Source,
     Mineral,
     Controller,
+    ConstructionSites,
     ConstructedWall,
     Extension,
     Link,
@@ -27,10 +28,10 @@ enum ScreepsObjectType{
 
 #[derive(Debug, Clone)]
 pub struct ObjectBasicInfo{
-    obj_type:ScreepsObjectType,
-    name:String,
-    id:String,
-    pos:Position,
+    pub obj_type:ScreepsObjectType,
+    pub name:String,
+    pub id:String,
+    pub pos:Position,
 }
 
 

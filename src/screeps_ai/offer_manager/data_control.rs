@@ -17,7 +17,7 @@ impl Manager {
 impl GroupEmployInfo {
     pub fn new() -> GroupEmployInfo{
         GroupEmployInfo{
-            nothing_to_do:false,
+            pausing:false,
             workers:HashSet::new(),
             at_least_number:0,
             normal_number:2,
@@ -26,11 +26,11 @@ impl GroupEmployInfo {
             flag:None,
         }
     }
-
-    pub fn turn_back_workers(&mut self){
-        for worker in &self.workers {
-
-        }
-    }
+//
+//    pub fn turn_back_workers(&mut self){
+//        for worker in &self.workers {
+//
+//        }
+//    }
 }
 

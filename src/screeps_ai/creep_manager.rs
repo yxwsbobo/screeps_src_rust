@@ -2,15 +2,23 @@
 mod generator;
 
 use screeps::{Part};
-use std::collections::{HashMap, BTreeMap, HashSet};
+use std::collections::{HashMap};
 
 #[derive(Debug,Clone)]
-struct EnergySourceInfo{
-    id:String,
-    current_number:usize,
-    worker_max:usize,
-    last_energy:usize,
-    spawn_name:String,
+pub enum EnergySourceType{
+    EnergySource,
+    Extension,
+    Container,
+}
+
+#[derive(Debug,Clone)]
+pub struct EnergySourceInfo{
+    pub id:String,
+    pub source_type: EnergySourceType,
+    pub current_number:usize,
+    pub worker_max:usize,
+    pub last_energy:usize,
+    pub spawn_id:String,
 }
 
 pub struct Manager {

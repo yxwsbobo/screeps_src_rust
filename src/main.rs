@@ -18,12 +18,8 @@ fn my_test_call(){
 fn main() {
     stdweb::initialize();
     logging::setup_logging(logging::Info);
+    info!("in main");
     screeps_ai::SuperAI::init_global_ai();
-
-    js!{
-        var my_test_call = @{my_test_call};
-        var my_test_value = 5;
-    }
 
     js! {
         var game_loop = @{game_loop};
@@ -55,5 +51,4 @@ fn game_loop() {
 
 //    info!("start cpu: {}, end cpu: {}",start_cpu, screeps::game::cpu::get_used())
 }
-
 
