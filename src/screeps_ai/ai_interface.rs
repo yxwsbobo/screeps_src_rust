@@ -1,4 +1,5 @@
 mod core;
+mod depends;
 
 use screeps_ai::{SuperAI, creep_manager, object_manager, offer_manager};
 

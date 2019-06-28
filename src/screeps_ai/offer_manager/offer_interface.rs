@@ -37,7 +37,7 @@ impl Manager {
                         state: WorkerState::DoSourceWork,
                         offer_level: *offer_level,
                     });
-                    offer.workers.insert(name.clone());
+                    offer.workers.insert(name.clone(),WorkerState::DoSourceWork);
                     info!("new creep:{}, offer:{:#?}",name, offer.offer_type);
                     return true;
                 }
@@ -75,7 +75,7 @@ impl Manager {
     pub fn fire_creep(&mut self, name:&String){
         for (_,offers) in &mut self.offer_list {
             for (_, offer) in offers {
-                if offer.workers.contains(name){
+                if offer.workers.contains_key(name){
                     offer.workers.remove(name);
                     self.workers_info.remove(name);
                     info!("died creep: {}", name);
@@ -84,19 +84,19 @@ impl Manager {
         }
     }
 
-    fn each_target_offer_do(&mut self, id:&str, op:fn(&mut GroupEmployInfo)->bool){
-        for (_,current_list) in self.offer_list.borrow_mut() {
-            for (_,offer) in current_list {
-                if let PointToPoint(info) = &mut offer.offer_type{
-                    if info.target == id{
-                        if op(offer){
-                            return
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    fn each_target_offer_do(&mut self, id:&str, op:fn(&mut GroupEmployInfo)->bool){
+//        for (_,current_list) in self.offer_list.borrow_mut() {
+//            for (_,offer) in current_list {
+//                if let PointToPoint(info) = &mut offer.offer_type{
+//                    if info.target == id{
+//                        if op(offer){
+//                            return
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     fn find_can_use_offer(&self)-> &GroupEmployInfo{
         for (_,current_list) in &self.offer_list {
@@ -110,35 +110,41 @@ impl Manager {
     }
 
     pub fn pause_group_offer(&mut self, id:&str){
-        self.each_target_offer_do(id, |offer|{
-            if offer.pausing{
-                return true;
-            }
-            offer.pausing = true;
-            for name in &offer.workers {
-                let worker = get_offer_manager().workers_info.get_mut(name)
-                    .expect("not find worker");
-                worker.info =get_offer_manager().find_can_use_offer().offer_type.clone();
-            };
-            false
-        });
+//        self.each_target_offer_do(id, |offer|{
+//            if offer.pausing{
+//                return true;
+//            }
+//            offer.pausing = true;
+//            for name in &offer.workers {
+//                let worker = get_offer_manager().workers_info.get_mut(name)
+//                    .expect("not find worker");
+//                info!("pause old :{:#?}", worker);
+//                worker.info =get_offer_manager().find_can_use_offer().offer_type.clone();
+//                info!("pause and change to: {:#?}",worker);
+//            };
+//
+//            false
+//        });
     }
 
     pub fn resume_group_offer(&mut self, id:&str){
-        self.each_target_offer_do(id, |offer|{
-            if !offer.pausing {
-                return true;
-            }
-            offer.pausing = false;
-
-            //Todo how to fix this
-            for name in &offer.workers {
-                let worker = get_offer_manager().workers_info.get_mut(name)
-                    .expect("not find worker");
-                worker.info =offer.offer_type.clone();
-            };
-
-            false
-        });
+//        self.each_target_offer_do(id, |offer|{
+//            if !offer.pausing {
+//                return true;
+//            }
+//            offer.pausing = false;
+//
+//            //Todo how to fix this
+//            for name in &offer.workers {
+//                let worker = get_offer_manager().workers_info.get_mut(name)
+//                    .expect("not find worker");
+//                info!("resume old :{:#?}", worker);
+//                worker.info =offer.offer_type.clone();
+//                info!("resume and back to: {:#?}",worker);
+//
+//            };
+//
+//            false
+//        });
     }
 }

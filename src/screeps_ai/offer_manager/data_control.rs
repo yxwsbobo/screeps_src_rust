@@ -1,5 +1,5 @@
 
-use std::collections::HashSet;
+use std::collections::{HashMap};
 use screeps_ai::offer_manager::{Manager, GroupEmployInfo, WorkType};
 
 impl Manager {
@@ -18,7 +18,7 @@ impl GroupEmployInfo {
     pub fn new() -> GroupEmployInfo{
         GroupEmployInfo{
             pausing:false,
-            workers:HashSet::new(),
+            workers:HashMap::new(),
             at_least_number:0,
             normal_number:2,
             max_number:4,
