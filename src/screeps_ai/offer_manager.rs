@@ -1,19 +1,48 @@
-mod offer_interface;
-mod data_control;
 mod action;
+mod data_control;
 mod default_offer;
+mod offer_interface;
 
-use std::collections::{BTreeMap, HashMap};
 use screeps_ai::object_manager::ObjectBasicInfo;
+use std::collections::{BTreeMap, HashMap};
 
-#[derive(Debug,Clone)]
-pub struct PointToPointWorkInfo{
-    source:&'static ObjectBasicInfo,
-    target:&'static ObjectBasicInfo,
+#[derive(Debug, Clone)]
+pub struct PointToPointWorkInfo {
+    source: &'static ObjectBasicInfo,
+    source_action: ActionType,
+    target: &'static ObjectBasicInfo,
+    target_action: ActionType,
+}
+
+#[derive(Debug, Clone)]
+pub enum ActionType {
+    Harvest,
+    Transfer(screeps::constants::ResourceType),
+    UpgradeController,
+    Renew,
+    Attack,
+    AttackController,
+    RangeAttack,
+    RangedMassAttack,
+    RangeHeal,
+    Build,
+    ClaimController,
+    Dismantle,
+    Drop,
+    GenerateSafeMode,
+    Heal,
+    PickUp,
+    Pull,
+    Repair,
+    ReserveController,
+    Say,
+    SignController,
+    Suicide,
+    WithDraw,
 }
 
 #[derive(Clone, Debug)]
-enum WorkerState{
+pub enum WorkerState {
     StupidWorker,
     //    MoveToSource,
     DoSourceWork,
@@ -21,34 +50,26 @@ enum WorkerState{
     DoTargetWork,
 }
 
-#[derive(Debug,Clone)]
-enum WorkType{
+#[derive(Debug, Clone)]
+pub enum WorkType {
     UnKnown,
     PointToPoint(PointToPointWorkInfo),
     CleanRoom,
 }
 
 #[derive(Clone, Debug)]
-pub struct WorkerInfo{
-    info:WorkType,
-    state:WorkerState,
-    offer_level:i32,
+pub struct GroupEmployInfo {
+    pausing: bool,
+    workers: HashMap<String, WorkerState>,
+    max_number: usize,
+    offer_type: WorkType,
+    flag: Option<String>,
 }
 
-#[derive(Clone,Debug)]
-struct GroupEmployInfo{
-    pausing:bool,
-    workers:HashMap<String,WorkerState>,
-    at_least_number:usize,
-    normal_number:usize,
-    max_number:usize,
-    offer_type:WorkType,
-    flag:Option<String>,
-}
+pub struct Manager {
+    offer_list: BTreeMap<i32, Vec<GroupEmployInfo>>,
+    current_number: usize,
+    max_number: usize,
 
-
-pub struct Manager{
-    offer_list:BTreeMap<i32,HashMap<String,GroupEmployInfo>>,
-    pub workers_info:HashMap<String,WorkerInfo>,
-
+    spawn_offers: HashMap<String, Vec<&'static mut GroupEmployInfo>>,
 }

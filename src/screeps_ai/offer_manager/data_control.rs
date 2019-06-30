@@ -19,9 +19,7 @@ impl GroupEmployInfo {
         GroupEmployInfo{
             pausing:false,
             workers:HashMap::new(),
-            at_least_number:0,
-            normal_number:2,
-            max_number:4,
+            max_number:0,
             offer_type:WorkType::UnKnown,
             flag:None,
         }

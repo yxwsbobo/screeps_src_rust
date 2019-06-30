@@ -1,4 +1,4 @@
-#![recursion_limit = "128"]
+//#![recursion_limit = "128"]
 extern crate fern;
 #[macro_use]
 extern crate log;
@@ -7,19 +7,21 @@ extern crate screeps;
 extern crate stdweb;
 extern crate core;
 
-
 mod logging;
 mod screeps_ai;
 
-fn my_test_call(){
-
-}
+fn my_test_call() {}
 
 fn main() {
     stdweb::initialize();
-    logging::setup_logging(logging::Info);
+    logging::setup_logging(logging::Debug);
     info!("in main");
-    screeps_ai::SuperAI::init_global_ai();
+    //    if screeps::game::shard::name() == "shard2" {
+    //        return;
+    //    }
+    if screeps::game::shard::name() == "shard3" {
+        screeps_ai::SuperAI::init_global_ai();
+    }
 
     js! {
         var game_loop = @{game_loop};
@@ -44,11 +46,22 @@ fn main() {
 }
 
 fn game_loop() {
-//    info!("in loop");
-//    let start_cpu = screeps::game::cpu::get_used();
+    if screeps::game::shard::name() == "shard2" {
+        return;
+    }
+    //    info!("in loop");
+    let start_cpu = screeps::game::cpu::get_used();
+
+    if start_cpu > 30. {
+        warn!("in start loop used cup: {}", start_cpu);
+        return;
+    }
 
     screeps_ai::SuperAI::run_once();
 
-//    info!("start cpu: {}, end cpu: {}",start_cpu, screeps::game::cpu::get_used())
+    //    info!(
+    //        "start cpu: {}, end cpu: {}",
+    //        start_cpu,
+    //        screeps::game::cpu::get_used()
+    //    )
 }
-
