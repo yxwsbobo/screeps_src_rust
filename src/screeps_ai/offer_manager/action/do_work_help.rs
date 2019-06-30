@@ -4,6 +4,40 @@ use screeps_ai::object_manager::{ObjectBasicInfo, ScreepsObjectType};
 use screeps_ai::offer_manager::{ActionType, Manager};
 
 impl Manager {
+    pub fn is_invalid_action(target_info: &ObjectBasicInfo, action: &ActionType) -> bool {
+        let obj_manager = get_object_manager();
+        obj_manager.get_game_object(&target_info.id);
+        let target = obj_manager.get_game_object(&target_info.id);
+
+        match action {
+            ActionType::Harvest => return target.energy_empty(),
+            ActionType::Transfer(_) => return target.energy_full(),
+            ActionType::UpgradeController => return false,
+            ActionType::Renew => {}
+            ActionType::Attack => {}
+            ActionType::AttackController => {}
+            ActionType::RangeAttack => {}
+            ActionType::RangedMassAttack => {}
+            ActionType::RangeHeal => {}
+            ActionType::Build => return false,
+            ActionType::ClaimController => {}
+            ActionType::Dismantle => {}
+            ActionType::Drop => {}
+            ActionType::GenerateSafeMode => {}
+            ActionType::Heal => {}
+            ActionType::PickUp => {}
+            ActionType::Pull => {}
+            ActionType::Repair => {}
+            ActionType::ReserveController => {}
+            ActionType::Say => {}
+            ActionType::SignController => {}
+            ActionType::Suicide => {}
+            ActionType::WithDraw => {}
+        }
+
+        false
+    }
+
     pub fn creep_do_work(
         creep: &screeps::objects::Creep,
         target_info: &ObjectBasicInfo,
@@ -12,8 +46,6 @@ impl Manager {
         let obj_manager = get_object_manager();
         obj_manager.get_game_object(&target_info.id);
         let target = obj_manager.get_game_object(&target_info.id);
-        //        let target =
-        //            screeps::game::get_object_erased(&target_info.id).expect("get_game_object not found");
 
         let mut result = screeps::ReturnCode::Other;
 
@@ -30,9 +62,9 @@ impl Manager {
             | ActionType::PickUp
             | ActionType::Pull
             | ActionType::WithDraw => {
-                if !creep.pos().is_near_to(target) {
+                if !creep.pos().is_near_to(&*target) {
                     if creep.fatigue() <= 0 {
-                        creep.move_to(target);
+                        creep.move_to(&*target);
                     }
                     return;
                 }
@@ -44,9 +76,9 @@ impl Manager {
             | ActionType::RangeHeal
             | ActionType::RangedMassAttack
             | ActionType::Repair => {
-                if !creep.pos().in_range_to(target, 3) {
+                if !creep.pos().in_range_to(&*target, 3) {
                     if creep.fatigue() <= 0 {
-                        creep.move_to(target);
+                        creep.move_to(&*target);
                     }
                     return;
                 }
@@ -57,55 +89,55 @@ impl Manager {
 
         match &action {
             ActionType::Harvest => {
-                result = creep._harvest(target);
+                result = creep._harvest(&*target);
             }
             ActionType::Transfer(v) => {
-                result = creep.transfer_all(target, v.clone());
+                result = creep.transfer_all(&*target, v.clone());
             }
             ActionType::UpgradeController => {
-                result = creep._upgrade_controller(target);
+                result = creep._upgrade_controller(&*target);
             }
             ActionType::Renew => {}
             ActionType::Attack => {
-                result = creep.attack(target);
+                result = creep.attack(&*target);
             }
             ActionType::AttackController => {
-                result = creep._attack_controller(target);
+                result = creep._attack_controller(&*target);
             }
             ActionType::RangeAttack => {
-                result = creep.ranged_attack(target);
+                result = creep.ranged_attack(&*target);
             }
             ActionType::RangedMassAttack => {
                 result = creep.ranged_mass_attack();
             }
             ActionType::RangeHeal => {
-                result = creep._ranged_heal(target);
+                result = creep._ranged_heal(&*target);
             }
             ActionType::Build => {
-                result = creep._build(target);
+                result = creep._build(&*target);
             }
             ActionType::ClaimController => {
-                result = creep._claim_controller(target);
+                result = creep._claim_controller(&*target);
             }
             ActionType::Dismantle => {
-                result = creep.dismantle(target);
+                result = creep.dismantle(&*target);
             }
             ActionType::Drop => {}
             ActionType::GenerateSafeMode => {
-                result = creep._generate_safe_mode(target);
+                result = creep._generate_safe_mode(&*target);
             }
             ActionType::Heal => {
-                result = creep._heal(target);
+                result = creep._heal(&*target);
             }
             ActionType::PickUp => {
-                result = creep._pickup(target);
+                result = creep._pickup(&*target);
             }
             ActionType::Pull => {}
             ActionType::Repair => {
-                result = creep.repair(target);
+                result = creep.repair(&*target);
             }
             ActionType::ReserveController => {
-                result = creep._reserve_controller(target);
+                result = creep._reserve_controller(&*target);
             }
             ActionType::Say => {}
             ActionType::SignController => {}
@@ -117,6 +149,7 @@ impl Manager {
 
         match result {
             screeps::ReturnCode::Ok => {}
+            screeps::ReturnCode::NoBodypart => {}
             screeps::ReturnCode::NotEnough | screeps::ReturnCode::Full => {}
             _ => {
                 info!("action error :{:#?}", result);

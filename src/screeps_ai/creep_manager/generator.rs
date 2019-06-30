@@ -8,77 +8,22 @@ use screeps_ai::{get_object_manager, get_offer_manager, object_manager};
 
 impl Manager {
     pub fn generator_init(&mut self) -> bool {
-        //        self.init_source_info();
         true
     }
 
-    //    fn insert_source(&mut self,source:&screeps::objects::Source, worker_max:usize){
-    //        let spawn_id = source.pos().find_closest_by_range(find::MY_SPAWNS).unwrap().id();
-    //
-    //        self.sources_info.insert(source.id(), EnergySourceInfo {
-    //            current_number: 0,
-    //            worker_max,
-    //            id:source.id(),
-    //            source_type: EnergySourceType::EnergySource,
-    //            spawn_id,
-    //        });
-    //    }
-
-    //    fn init_source_info(&mut self) {
-    //        let rooms: &Vec<screeps::objects::Room> = &screeps::game::rooms::values();
-    //        for room in rooms {
-    //            let mut worker_max = 5;
-    //            let sources: &Vec<screeps::objects::Source> = &room.find(find::SOURCES);
-    //            for source in sources {
-    //                self.insert_source(source, worker_max);
-    //                worker_max *= 3;
-    //            }
-    //        }
-    //    }
-
-    pub fn cleanup_memory(&mut self) -> Result<(), Box<dyn (::std::error::Error)>> {
-        let alive_creeps: HashSet<String> = screeps::game::creeps::keys().into_iter().collect();
-
-        let screeps_memory = match screeps::memory::root().dict("creeps")? {
-            Some(v) => v,
+    pub fn cleanup_memory(name: &str) {
+        match screeps::memory::root()
+            .dict("creeps")
+            .expect("no memory.creeps")
+        {
+            Some(v) => v.del(&name),
             None => {
                 warn!("not cleaning game creep memory: no Memory.creeps dict");
-                return Ok(());
             }
         };
-
-        for mem_name in screeps_memory.keys() {
-            if !alive_creeps.contains(&mem_name) {
-                info!("cleaning up creep memory of dead creep {}", mem_name);
-                screeps_memory.del(&mem_name);
-                get_offer_manager().fire_creep(&mem_name);
-            }
-        }
-
-        Ok(())
     }
-
-    fn check_clean_memory(&mut self) {
-        if screeps::game::time() % 32 == 3 {
-            self.cleanup_memory()
-                .expect("expected Memory.creeps format to be a regular memory object");
-        }
-    }
-
-    //    fn find_worker_source(&mut self) -> Option<&mut usize>{
-    //        for (_, info) in &mut self.sources_info {
-    //            if info.left_number + info.used_number < info.worker_max{
-    //                return Some(&mut info.left_number);
-    //            }
-    //        }
-    //        None
-    //    }
-
-    //    pub fn
 
     pub fn check_create_creep(&mut self) {
-        self.check_clean_memory();
-
         if get_offer_manager().check_worker_full() {
             return;
         }
@@ -102,24 +47,4 @@ impl Manager {
             }
         }
     }
-    //
-    //    pub fn get_closest_source(&self,id:&str)->String{
-    //        let mut range = std::u32::MAX;
-    //        let mut find_id = &String::new();
-    //        let target = get_object_manager().get_object(id);
-    //        for id in self.sources_info.keys() {
-    //            let source = get_object_manager().get_object(id);
-    //            let dif = source.pool_diff_range(target);
-    //            if range > dif{
-    //                range = dif;
-    //                find_id = &source.id;
-    //            }
-    //        }
-    //
-    //        find_id.clone()
-    //    }
-    //
-    //    pub fn get_sources(&self)->&HashMap<String,EnergySourceInfo>{
-    //        &self.sources_info
-    //    }
 }

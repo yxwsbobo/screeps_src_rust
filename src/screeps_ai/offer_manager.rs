@@ -5,12 +5,13 @@ mod offer_interface;
 
 use screeps_ai::object_manager::ObjectBasicInfo;
 use std::collections::{BTreeMap, HashMap};
+use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub struct PointToPointWorkInfo {
-    source: &'static ObjectBasicInfo,
+    source: Rc<ObjectBasicInfo>,
     source_action: ActionType,
-    target: &'static ObjectBasicInfo,
+    target: Rc<ObjectBasicInfo>,
     target_action: ActionType,
 }
 
@@ -54,6 +55,7 @@ pub enum WorkerState {
 pub enum WorkType {
     UnKnown,
     PointToPoint(PointToPointWorkInfo),
+    BuildAll(PointToPointWorkInfo),
     CleanRoom,
 }
 
@@ -63,13 +65,11 @@ pub struct GroupEmployInfo {
     workers: HashMap<String, WorkerState>,
     max_number: usize,
     offer_type: WorkType,
-    flag: Option<String>,
+    next_offer: Option<&'static GroupEmployInfo>,
 }
 
 pub struct Manager {
     offer_list: BTreeMap<i32, Vec<GroupEmployInfo>>,
     current_number: usize,
     max_number: usize,
-
-    spawn_offers: HashMap<String, Vec<&'static mut GroupEmployInfo>>,
 }

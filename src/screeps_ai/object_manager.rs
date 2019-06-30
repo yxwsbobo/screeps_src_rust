@@ -1,5 +1,7 @@
 use screeps_ai::common::Position;
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 mod object_interface;
 
@@ -11,10 +13,16 @@ pub enum ScreepsObjectType {
     PowerCreep,
     Source,
     Mineral,
+    Extractor,
     Controller,
+    Container,
     ConstructionSites,
     ConstructedWall,
+    Rampart,
+    KeeperLair,
+    Wall,
     Extension,
+    Road,
     Link,
     Storage,
     Tower,
@@ -23,6 +31,7 @@ pub enum ScreepsObjectType {
     PowerBank,
     Lab,
     Terminal,
+    Portal,
     Nuker,
 }
 
@@ -35,11 +44,9 @@ pub struct ObjectBasicInfo {
 }
 
 pub struct Manager {
-    objects: HashMap<String, ObjectBasicInfo>,
+    objects: HashMap<String, Rc<ObjectBasicInfo>>,
+    room_objects: HashMap<String, Rc<screeps::objects::RoomObject>>,
 
-    sources_lists: Vec<ObjectBasicInfo>,
-
-    source_range: HashMap<String, Vec<ObjectBasicInfo>>,
-
-    room_objects: HashMap<String, screeps::objects::RoomObject>,
+    sources_lists: Vec<Rc<ObjectBasicInfo>>,
+    source_range: HashMap<String, Vec<Rc<ObjectBasicInfo>>>,
 }

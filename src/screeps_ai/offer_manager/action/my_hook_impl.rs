@@ -23,3 +23,18 @@ use screeps::{objects::*, Transferable};
 //    (_reserve_controller(RoomObject) -> reserveController),
 //    (_upgrade_controller(RoomObject) -> upgradeController),
 //}
+
+//
+//impl RoomObject {
+//    pub fn energy_full(&self) -> bool {
+//        js_unwrap! { @{self.as_ref()}.energy === @{self.as_ref()}.energyCapacity }
+//    }
+//
+//    pub fn energy_empty(&self) -> bool {
+//        js_unwrap! { @{self.as_ref()}.energy === 0 }
+//    }
+//
+//    pub fn build_over(&self) -> bool {
+//        js_unwrap! { @{self.as_ref()}.progress === @{self.as_ref()}.progressTotal }
+//    }
+//}

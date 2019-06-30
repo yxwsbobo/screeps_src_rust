@@ -72,12 +72,23 @@ impl SuperAI {
             return;
         }
 
+        debug!("start cost cpu: {}", screeps::game::cpu::get_used());
         self.obj_manager.clean_invalid_object();
+        debug!("obj_manager cost cpu: {}", screeps::game::cpu::get_used());
 
         self.cp_manager.check_create_creep();
+        debug!("cp_manager cost cpu: {}", screeps::game::cpu::get_used());
 
         self.offer_mgr.set_offer_state();
+        debug!(
+            "set_offer_state cost cpu: {}",
+            screeps::game::cpu::get_used()
+        );
 
         self.offer_mgr.creeps_do_work();
+        debug!(
+            "creeps_do_work cost cpu: {}",
+            screeps::game::cpu::get_used()
+        );
     }
 }

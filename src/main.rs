@@ -14,7 +14,7 @@ fn my_test_call() {}
 
 fn main() {
     stdweb::initialize();
-    logging::setup_logging(logging::Debug);
+    logging::setup_logging(logging::Info);
     info!("in main");
     //    if screeps::game::shard::name() == "shard2" {
     //        return;
