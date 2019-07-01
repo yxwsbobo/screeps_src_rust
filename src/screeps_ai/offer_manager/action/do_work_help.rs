@@ -1,13 +1,12 @@
-use screeps::{HasPosition};
+use screeps::HasPosition;
 use screeps_ai::get_object_manager;
-use screeps_ai::object_manager::{ObjectBasicInfo};
+use screeps_ai::object_manager::ObjectBasicInfo;
 use screeps_ai::offer_manager::{ActionType, Manager};
 
 impl Manager {
-    pub fn is_invalid_action(target_info: &ObjectBasicInfo, action: &ActionType) -> bool {
+    pub fn is_invalid_action(target_id: &str, action: &ActionType) -> bool {
         let obj_manager = get_object_manager();
-        obj_manager.get_game_object(&target_info.id);
-        let target = obj_manager.get_game_object(&target_info.id);
+        let target = obj_manager.get_game_object(target_id);
 
         match action {
             ActionType::Harvest => return target.energy_empty(),

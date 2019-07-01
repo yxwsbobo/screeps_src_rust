@@ -1,6 +1,9 @@
-use screeps::{find, HasId, HasPosition, StructureType};
+use screeps::{find, HasId, HasPosition, Structure, StructureType};
 use screeps_ai::common::Position;
 use screeps_ai::object_manager::{Manager, ObjectBasicInfo, ScreepsObjectType};
+use screeps_ai::offer_manager;
+use screeps_ai::offer_manager::ActionType;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 impl Manager {
@@ -10,11 +13,10 @@ impl Manager {
 
     pub fn new() -> Manager {
         Manager {
-            objects: Default::default(),
-            sources_lists: Default::default(),
+            objects: HashMap::with_capacity(100),
             source_range: Default::default(),
             room_objects: Default::default(),
-            con_sites: Default::default(),
+            structures_lists: Default::default(),
         }
     }
 
@@ -22,61 +24,83 @@ impl Manager {
         self.room_objects.clear();
     }
 
-    fn init_objects_in_room(&mut self) {
-        let rooms: &Vec<screeps::objects::Room> = &screeps::game::rooms::values();
-        for room in rooms {
-            {
-                //sources
-                let sources: &Vec<screeps::objects::Source> = &room.find(find::SOURCES);
-                for source in sources {
-                    let id = source.id();
-                    let pos = &source.pos();
+    fn insert_object_info<T>(&mut self, obj: &T, obj_type: ScreepsObjectType)
+    where
+        T: screeps::objects::HasPosition + screeps::objects::HasId,
+    {
+        let id = obj.id();
+        let pos = &obj.pos();
 
-                    let basic_info = Rc::new(ObjectBasicInfo {
-                        obj_type: ScreepsObjectType::Source,
-                        id: id.clone(),
-                        name: id.clone(),
-                        pos: Position {
-                            x: pos.x(),
-                            y: pos.y(),
-                        },
-                    });
-                    self.objects.insert(id.clone(), basic_info.clone());
-                    self.sources_lists.push(basic_info);
-                    //                    self.room_objects.insert(id.clone(),Rc::new(source.try_into()));
+        let basic_info = Rc::new(ObjectBasicInfo {
+            obj_type: obj_type.clone(),
+            id: id.clone(),
+            pos: Position {
+                x: pos.x(),
+                y: pos.y(),
+            },
+        });
+        self.structures_lists[obj_type as usize].push(basic_info.clone());
+        self.objects.insert(id, basic_info);
+    }
+
+    fn init_structures(&mut self) {
+        let structures: &Vec<screeps::objects::Structure> = &screeps::game::structures::values();
+
+        for structure in structures {
+            match structure {
+                Structure::Container(v) => self.insert_object_info(v, ScreepsObjectType::Container),
+                Structure::Controller(v) => {
+                    self.insert_object_info(v, ScreepsObjectType::Controller)
                 }
-            }
-
-            {
-                //controller
-                if let Some(controller) = &room.controller() {
-                    let id = controller.id();
-                    let pos = &controller.pos();
-
-                    let my_pos = Position {
-                        x: pos.x(),
-                        y: pos.y(),
-                    };
-
-                    let mut sl = self.sources_lists.clone();
-                    sl.sort_by_cached_key(|v| v.pos.range_to(&my_pos));
-                    self.source_range.insert(controller.id(), sl);
-
-                    let basic_info = Rc::new(ObjectBasicInfo {
-                        obj_type: ScreepsObjectType::Controller,
-                        name: id.clone(),
-                        id: id.clone(),
-                        pos: my_pos,
-                    });
-                    self.objects.insert(id.clone(), basic_info);
+                Structure::Extension(v) => self.insert_object_info(v, ScreepsObjectType::Extension),
+                Structure::Extractor(v) => self.insert_object_info(v, ScreepsObjectType::Extractor),
+                Structure::KeeperLair(v) => {
+                    self.insert_object_info(v, ScreepsObjectType::KeeperLair)
                 }
+                Structure::Lab(v) => self.insert_object_info(v, ScreepsObjectType::Lab),
+                Structure::Link(v) => self.insert_object_info(v, ScreepsObjectType::Link),
+                Structure::Nuker(v) => self.insert_object_info(v, ScreepsObjectType::Nuker),
+                Structure::Observer(v) => self.insert_object_info(v, ScreepsObjectType::Observer),
+                Structure::PowerBank(v) => self.insert_object_info(v, ScreepsObjectType::PowerBank),
+                Structure::PowerSpawn(v) => {
+                    self.insert_object_info(v, ScreepsObjectType::PowerSpawn)
+                }
+                Structure::Portal(v) => self.insert_object_info(v, ScreepsObjectType::Portal),
+                Structure::Rampart(v) => self.insert_object_info(v, ScreepsObjectType::Rampart),
+                Structure::Road(v) => self.insert_object_info(v, ScreepsObjectType::Road),
+                Structure::Spawn(v) => self.insert_object_info(v, ScreepsObjectType::Storage),
+                Structure::Storage(v) => self.insert_object_info(v, ScreepsObjectType::Container),
+                Structure::Terminal(v) => self.insert_object_info(v, ScreepsObjectType::Terminal),
+                Structure::Tower(v) => self.insert_object_info(v, ScreepsObjectType::Tower),
+                Structure::Wall(v) => self.insert_object_info(v, ScreepsObjectType::Wall),
             }
-
-            //next room
         }
     }
 
-    pub fn init_objects_spawns(&mut self) {
+    fn init_objects_in_room(&mut self) {
+        let rooms: &Vec<screeps::objects::Room> = &screeps::game::rooms::values();
+        for room in rooms {
+            //sources
+            let sources: &Vec<screeps::objects::Source> = &room.find(find::SOURCES);
+            for source in sources {
+                let id = source.id();
+                let pos = &source.pos();
+
+                let basic_info = Rc::new(ObjectBasicInfo {
+                    obj_type: ScreepsObjectType::Source,
+                    id: id.clone(),
+                    pos: Position {
+                        x: pos.x(),
+                        y: pos.y(),
+                    },
+                });
+                self.objects.insert(id.clone(), basic_info.clone());
+                self.structures_lists[ScreepsObjectType::Source as usize].push(basic_info);
+            }
+        }
+    }
+
+    fn init_objects_spawns(&mut self) {
         for spawn in &screeps::game::spawns::values() {
             let pos = &spawn.pos();
 
@@ -85,26 +109,23 @@ impl Manager {
                 y: pos.y(),
             };
 
-            let mut sl = self.sources_lists.clone();
-            sl.sort_by_cached_key(|v| v.pos.range_to(&my_pos));
-            self.source_range.insert(spawn.id(), sl);
-
             let basic_info = Rc::new(ObjectBasicInfo {
                 obj_type: ScreepsObjectType::Spawn,
-                name: spawn.name(),
                 id: spawn.id(),
                 pos: my_pos,
             });
-            self.objects.insert(spawn.id(), basic_info);
+            self.objects.insert(spawn.id(), basic_info.clone());
+            self.structures_lists[ScreepsObjectType::Spawn as usize].push(basic_info);
         }
     }
 
-    pub fn init_objects_constructions(&mut self) {
-        self.con_sites.clear();
+    fn init_objects_constructions(&mut self) {
+        self.structures_lists[ScreepsObjectType::ConstructionSites as usize].clear();
         for construction in &screeps::game::construction_sites::values() {
             let id = construction.id();
-            if let Some(v) = self.objects.get(&id){
-                self.con_sites.push(v.clone());
+            if let Some(v) = self.objects.get(&id) {
+                self.structures_lists[ScreepsObjectType::ConstructionSites as usize]
+                    .push(v.clone());
                 continue;
             }
 
@@ -114,25 +135,22 @@ impl Manager {
                 y: pos.y(),
             };
 
-            let mut sl = self.sources_lists.clone();
-            sl.sort_by_cached_key(|v| v.pos.range_to(&my_pos));
-            self.source_range.insert(id.clone(), sl);
-
             let basic_info = Rc::new(ObjectBasicInfo {
                 obj_type: ScreepsObjectType::ConstructionSites,
-                name: id.clone(),
                 id: id.clone(),
                 pos: my_pos,
             });
-            self.con_sites.push(basic_info.clone());
-            self.objects.insert(id,basic_info);
+            self.structures_lists[ScreepsObjectType::ConstructionSites as usize]
+                .push(basic_info.clone());
+            self.objects.insert(id, basic_info);
         }
     }
 
     pub fn init(&mut self) -> bool {
+        self.init_structures();
         self.init_objects_in_room();
-        self.init_objects_spawns();
         self.init_objects_constructions();
+        self.init_objects_spawns();
 
         true
     }
@@ -161,8 +179,8 @@ impl Manager {
         }
     }
 
-    pub fn get_first_source(&self) ->Rc<ObjectBasicInfo>{
-        self.sources_lists[0].clone()
+    pub fn get_first_source(&self) -> Rc<ObjectBasicInfo> {
+        self.structures_lists[ScreepsObjectType::Source as usize][0].clone()
     }
 
     pub fn get_object(&mut self, id: &str) -> Rc<ObjectBasicInfo> {
@@ -170,12 +188,10 @@ impl Manager {
             return v.clone();
         }
 
-
         let obj = self.get_game_object(id);
 
         let basic_info = Rc::new(ObjectBasicInfo {
             obj_type: ScreepsObjectType::Unknown,
-            name: "".to_string(),
             id: id.to_string(),
             pos: Position {
                 x: obj.pos().x(),
@@ -193,11 +209,11 @@ impl Manager {
         }
 
         let my_pos = &self.get_object(object_id).pos;
-        let mut sl = self.sources_lists.clone();
+        let mut sl = self.structures_lists[ScreepsObjectType::Source as usize].clone();
         sl.sort_by_cached_key(|v| v.pos.range_to(my_pos));
-        self.source_range
-            .insert(object_id.to_string(), sl)
-            .expect("source_range insert failed")
+
+        self.source_range.insert(object_id.to_string(), sl.clone());
+        sl
     }
 
     pub fn get_game_object(self: &mut Self, id: &str) -> Rc<screeps::objects::RoomObject> {
@@ -209,25 +225,63 @@ impl Manager {
             .clone()
     }
 
+    pub fn get_structures(&self, obj_type: ScreepsObjectType) -> Vec<Rc<ObjectBasicInfo>> {
+        self.structures_lists[obj_type as usize].clone()
+    }
+
+    pub fn get_structures_ref(&self, obj_type: ScreepsObjectType) -> &Vec<Rc<ObjectBasicInfo>> {
+        &self.structures_lists[obj_type as usize]
+    }
+
+    pub fn get_transfer_object(&self) -> Option<Rc<ObjectBasicInfo>> {
+        let mut need_transfer = false;
+        let rooms: &Vec<screeps::objects::Room> = &screeps::game::rooms::values();
+        for room in rooms {
+            if room.energy_available() != room.energy_capacity_available() {
+                need_transfer = true;
+                break;
+            }
+        }
+        if !need_transfer {
+            return None;
+        }
+        for extension in &self.structures_lists[ScreepsObjectType::Extension as usize] {
+            if offer_manager::Manager::is_invalid_action(
+                &extension.id,
+                &ActionType::Transfer(screeps::constants::ResourceType::Energy),
+            ) {
+                continue;
+            } else {
+                return Some(extension.clone());
+            }
+        }
+        None
+    }
+
     pub fn get_building_object(&mut self) -> Option<Rc<ObjectBasicInfo>> {
-        if self.con_sites.is_empty() {
-            if screeps::game::time() %30 == 0{
+        if self.structures_lists[ScreepsObjectType::ConstructionSites as usize].is_empty() {
+            if screeps::game::time() % 30 == 0 {
                 self.init_objects_constructions();
             }
         }
 
-        loop{
-            if self.con_sites.is_empty() {
-                return None
-            }else{
-                let site = self.con_sites[self.con_sites.len()-1].clone();
+        loop {
+            if self.structures_lists[ScreepsObjectType::ConstructionSites as usize].is_empty() {
+                return None;
+            } else {
+                let site =
+                    self.structures_lists[ScreepsObjectType::ConstructionSites as usize][self
+                        .structures_lists[ScreepsObjectType::ConstructionSites as usize]
+                        .len()
+                        - 1]
+                    .clone();
                 let site_obj = self.get_game_object(&site.id);
 
-                if site_obj.build_over(){
-                    self.con_sites.pop();
+                if site_obj.build_over() {
+                    self.structures_lists[ScreepsObjectType::ConstructionSites as usize].pop();
                     continue;
                 }
-                return Some(site)
+                return Some(site);
             }
         }
     }

@@ -1,6 +1,6 @@
+use screeps_ai::creep_manager;
 use screeps_ai::offer_manager::{GroupEmployInfo, Manager, WorkerState};
-use screeps_ai::{creep_manager};
-use std::collections::{BTreeMap};
+use std::collections::BTreeMap;
 
 impl Manager {
     pub fn new() -> Manager {

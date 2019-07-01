@@ -32,12 +32,13 @@ pub enum ScreepsObjectType {
     Terminal,
     Portal,
     Nuker,
+
+    LastFlag,
 }
 
 #[derive(Debug, Clone)]
 pub struct ObjectBasicInfo {
     pub obj_type: ScreepsObjectType,
-    pub name: String,
     pub id: String,
     pub pos: Position,
 }
@@ -46,7 +47,7 @@ pub struct Manager {
     objects: HashMap<String, Rc<ObjectBasicInfo>>,
     room_objects: HashMap<String, Rc<screeps::objects::RoomObject>>,
 
-    con_sites:Vec<Rc<ObjectBasicInfo>>,
-    sources_lists: Vec<Rc<ObjectBasicInfo>>,
+    structures_lists: [Vec<Rc<ObjectBasicInfo>>; ScreepsObjectType::LastFlag as usize],
+
     source_range: HashMap<String, Vec<Rc<ObjectBasicInfo>>>,
 }

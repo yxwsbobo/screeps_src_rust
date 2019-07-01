@@ -4,8 +4,8 @@ mod p2p_work;
 
 use super::Manager;
 
+use screeps_ai::get_offer_manager;
 use screeps_ai::offer_manager::{WorkType, WorkerState};
-use screeps_ai::{get_offer_manager};
 use std::collections::HashMap;
 
 impl Manager {
@@ -52,7 +52,7 @@ impl Manager {
         creeps: &HashMap<String, screeps::objects::Creep>,
     ) {
         match &work_type {
-            WorkType::BuildAll(v) | WorkType::PointToPoint(v) => {
+            WorkType::BuildAll(v) | WorkType::PointToPoint(v) | WorkType::TransferAll(v) => {
                 for (name, state) in workers {
                     if let Some(creep) = creeps.get(&name.clone()) {
                         if creep.spawning() {
