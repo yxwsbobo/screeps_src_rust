@@ -1,4 +1,4 @@
-use screeps::{objects::*, Transferable};
+//use screeps::{objects::*, Transferable};
 
 //unsafe impl Transferable for RoomObject {}
 //unsafe impl Withdrawable for RoomObject {}

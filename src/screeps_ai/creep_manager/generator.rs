@@ -1,9 +1,8 @@
-use std::collections::{HashMap, HashSet};
 
-use screeps::{find, prelude::*, ReturnCode};
+use screeps::{prelude::*, ReturnCode};
 
-use super::{Manager, NORMAL_CREEP_BODY_INFO};
-use screeps_ai::{get_object_manager, get_offer_manager, object_manager};
+use super::{Manager};
+use screeps_ai::{get_offer_manager, object_manager};
 //use screeps_ai::creep_manager::{EnergySourceInfo, EnergySourceType};
 
 impl Manager {

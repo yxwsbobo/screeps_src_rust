@@ -10,7 +10,6 @@ extern crate core;
 mod logging;
 mod screeps_ai;
 
-fn my_test_call() {}
 
 fn main() {
     stdweb::initialize();

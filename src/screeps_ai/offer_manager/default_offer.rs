@@ -1,10 +1,8 @@
-use core::borrow::BorrowMut;
-use screeps::{CanStoreEnergy, HasId, OwnedStructureProperties};
+use screeps::{HasId, OwnedStructureProperties};
 use screeps_ai::offer_manager::{
     ActionType, GroupEmployInfo, Manager, PointToPointWorkInfo, WorkType,
 };
 use screeps_ai::{get_object_manager, get_offer_manager, object_manager};
-use std::collections::HashMap;
 
 impl Manager {
     fn add_offer_info(
@@ -83,27 +81,42 @@ impl Manager {
     }
 
     fn init_build_offer(&mut self) {
-        let level = 13;
-        let construction_sites = &screeps::game::construction_sites::values();
-        for construction_site in construction_sites {
-            if !construction_site.my() {
-                continue;
-            }
 
-            self.add_offer_info(level, construction_site.id(), ActionType::Build, 0, 0);
-        }
+        let temp_target = get_object_manager().get_first_source();
+        let mut employ_info = GroupEmployInfo::new();
+        let p2p = PointToPointWorkInfo {
+            source:temp_target.clone(),
+            source_action: ActionType::Harvest,
+            target: temp_target,
+            target_action: ActionType::Build,
+        };
 
-        let build_offer = self.offer_list.get_mut(&level).expect("fix me3");
-        build_offer[0].max_number = 4;
+        employ_info.offer_type = WorkType::BuildAll(p2p);
+        employ_info.max_number = 3;
 
-        let g_builder = get_offer_manager()
-            .offer_list
-            .get_mut(&level)
-            .expect("fix me 4");
-
-        for index in 1..g_builder.len() {
-            build_offer[index - 1].next_offer = Some(&g_builder[index]);
-        }
+        let offers = self.offer_list.entry(13).or_default();
+        offers.push(employ_info);
+//        let level = 13;
+//        let construction_sites = &screeps::game::construction_sites::values();
+//        for construction_site in construction_sites {
+//            if !construction_site.my() {
+//                continue;
+//            }
+//
+//            self.add_offer_info(level, construction_site.id(), ActionType::Build, 0, 0);
+//        }
+//
+//        let build_offer = self.offer_list.get_mut(&level).expect("fix me3");
+//        build_offer[0].max_number = 4;
+//
+//        let g_builder = get_offer_manager()
+//            .offer_list
+//            .get_mut(&level)
+//            .expect("fix me 4");
+//
+//        for index in 1..g_builder.len() {
+//            build_offer[index - 1].next_offer = Some(&g_builder[index]);
+//        }
     }
 
     fn init_workers_number(&mut self) {
@@ -118,6 +131,7 @@ impl Manager {
     fn init_pausing_do(&mut self) {
         let level2 = 15;
         let level1 = 10;
+        let level_builder = 13;
         let controller_offer = get_offer_manager().offer_list.get(&level2).expect("fix me");
 
         let spawn_offer = self.offer_list.get_mut(&level1).expect("fix me2");
@@ -126,6 +140,9 @@ impl Manager {
 
         let self_controller = self.offer_list.get_mut(&level2).expect("fix me");
         self_controller[0].next_offer = Some(&controller_offer[1]);
+
+        let self_builder = self.offer_list.get_mut(&level_builder).expect("fix me");
+        self_builder[0].next_offer = Some(&controller_offer[1]);
     }
 
     pub fn init_default_offers(&mut self) {
@@ -144,20 +161,19 @@ impl Manager {
         match work {
             WorkType::UnKnown => true,
             WorkType::PointToPoint(v) => {
-                Manager::is_invalid_action(v.source, &v.source_action)
-                    || Manager::is_invalid_action(v.target, &v.target_action)
+                Manager::is_invalid_action(&v.source, &v.source_action)
+                    || Manager::is_invalid_action(&v.target, &v.target_action)
             }
             WorkType::BuildAll(v) => match get_object_manager().get_building_object() {
                 None => true,
                 Some(target) => {
                     if v.target.id != target.id {
                         v.target = target;
-                        let sources = get_object_manager().get_object_to_source(&v.target.id);
-                        v.source = &sources[0];
+                        v.source = get_object_manager().get_object_to_source(&v.target.id)[0].clone();
                     }
 
-                    Manager::is_invalid_action(v.source, &v.source_action)
-                        || Manager::is_invalid_action(v.target, &v.target_action)
+                    Manager::is_invalid_action(&v.source, &v.source_action)
+                        || Manager::is_invalid_action(&v.target, &v.target_action)
                 }
             },
             WorkType::CleanRoom => true,

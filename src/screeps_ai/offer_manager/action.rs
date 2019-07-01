@@ -4,13 +4,8 @@ mod p2p_work;
 
 use super::Manager;
 
-use core::borrow::BorrowMut;
-use screeps::{prelude::*, ReturnCode};
-use screeps_ai::object_manager::{ObjectBasicInfo, ScreepsObjectType};
-use screeps_ai::offer_manager::{
-    ActionType, GroupEmployInfo, PointToPointWorkInfo, WorkType, WorkerState,
-};
-use screeps_ai::{get_creep_manager, get_object_manager, get_offer_manager};
+use screeps_ai::offer_manager::{WorkType, WorkerState};
+use screeps_ai::{get_offer_manager};
 use std::collections::HashMap;
 
 impl Manager {
@@ -31,7 +26,7 @@ impl Manager {
         let mut flag = false;
         for (_, offers) in &self.offer_list {
             for offer_info in offers {
-                for (name, v) in &offer_info.workers {
+                for (name, _) in &offer_info.workers {
                     if !offer_info.workers.contains_key(name) {
                         info!("not contain key: {}", name);
                         flag = true;

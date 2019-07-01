@@ -1,6 +1,6 @@
-use screeps::{HasId, HasPosition, SizedRoomObject, Transferable};
+use screeps::{HasPosition};
 use screeps_ai::get_object_manager;
-use screeps_ai::object_manager::{ObjectBasicInfo, ScreepsObjectType};
+use screeps_ai::object_manager::{ObjectBasicInfo};
 use screeps_ai::offer_manager::{ActionType, Manager};
 
 impl Manager {
@@ -44,7 +44,6 @@ impl Manager {
         action: &ActionType,
     ) {
         let obj_manager = get_object_manager();
-        obj_manager.get_game_object(&target_info.id);
         let target = obj_manager.get_game_object(&target_info.id);
 
         let mut result = screeps::ReturnCode::Other;

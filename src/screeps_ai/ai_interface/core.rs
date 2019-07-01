@@ -1,4 +1,3 @@
-use logging;
 use screeps_ai::SuperAI;
 
 #[derive(Debug)]

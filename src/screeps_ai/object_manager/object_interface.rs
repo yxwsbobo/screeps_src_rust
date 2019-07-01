@@ -1,9 +1,6 @@
-use screeps::{find, HasId, HasPosition, SizedRoomObject, StructureProperties, StructureType};
+use screeps::{find, HasId, HasPosition, StructureType};
 use screeps_ai::common::Position;
 use screeps_ai::object_manager::{Manager, ObjectBasicInfo, ScreepsObjectType};
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::convert::TryInto;
 use std::rc::Rc;
 
 impl Manager {
@@ -17,6 +14,7 @@ impl Manager {
             sources_lists: Default::default(),
             source_range: Default::default(),
             room_objects: Default::default(),
+            con_sites: Default::default(),
         }
     }
 
@@ -102,29 +100,33 @@ impl Manager {
     }
 
     pub fn init_objects_constructions(&mut self) {
-        //        for construction in &screeps::game::construction_sites::values() {
-        //            let pos = &construction.pos();
-        //            let id = construction.id();
-        //
-        //            let my_pos = Position {
-        //                x: pos.x(),
-        //                y: pos.y(),
-        //            };
-        //
-        //            let mut sl = self.sources_lists.clone();
-        //            sl.sort_by_cached_key(|v| v.pos.range_to(&my_pos));
-        //            self.source_range.insert(construction.id(), sl);
-        //
-        //            self.objects.insert(
-        //                id.clone(),
-        //                ObjectBasicInfo {
-        //                    obj_type: ScreepsObjectType::ConstructionSites,
-        //                    name: id.clone(),
-        //                    id,
-        //                    pos: my_pos,
-        //                },
-        //            );
-        //        }
+        self.con_sites.clear();
+        for construction in &screeps::game::construction_sites::values() {
+            let id = construction.id();
+            if let Some(v) = self.objects.get(&id){
+                self.con_sites.push(v.clone());
+                continue;
+            }
+
+            let pos = &construction.pos();
+            let my_pos = Position {
+                x: pos.x(),
+                y: pos.y(),
+            };
+
+            let mut sl = self.sources_lists.clone();
+            sl.sort_by_cached_key(|v| v.pos.range_to(&my_pos));
+            self.source_range.insert(id.clone(), sl);
+
+            let basic_info = Rc::new(ObjectBasicInfo {
+                obj_type: ScreepsObjectType::ConstructionSites,
+                name: id.clone(),
+                id: id.clone(),
+                pos: my_pos,
+            });
+            self.con_sites.push(basic_info.clone());
+            self.objects.insert(id,basic_info);
+        }
     }
 
     pub fn init(&mut self) -> bool {
@@ -159,17 +161,22 @@ impl Manager {
         }
     }
 
+    pub fn get_first_source(&self) ->Rc<ObjectBasicInfo>{
+        self.sources_lists[0].clone()
+    }
+
     pub fn get_object(&mut self, id: &str) -> Rc<ObjectBasicInfo> {
-        //Todo add on not exist
         if let Some(v) = self.objects.get(id) {
             return v.clone();
         }
 
+
         let obj = self.get_game_object(id);
+
         let basic_info = Rc::new(ObjectBasicInfo {
-            obj_type: Manager::convert_type_from_game(&obj.structure_type()),
+            obj_type: ScreepsObjectType::Unknown,
             name: "".to_string(),
-            id: "".to_string(),
+            id: id.to_string(),
             pos: Position {
                 x: obj.pos().x(),
                 y: obj.pos().y(),
@@ -202,13 +209,26 @@ impl Manager {
             .clone()
     }
 
-    pub fn get_building_object(&mut self) -> Option<&ObjectBasicInfo> {
-        let construction_sites = &screeps::game::construction_sites::values();
-        if construction_sites.len() == 0 {
-            None
-        } else {
-            None
-            //            Some(self.get_object(&construction_sites[0].id()))
+    pub fn get_building_object(&mut self) -> Option<Rc<ObjectBasicInfo>> {
+        if self.con_sites.is_empty() {
+            if screeps::game::time() %30 == 0{
+                self.init_objects_constructions();
+            }
+        }
+
+        loop{
+            if self.con_sites.is_empty() {
+                return None
+            }else{
+                let site = self.con_sites[self.con_sites.len()-1].clone();
+                let site_obj = self.get_game_object(&site.id);
+
+                if site_obj.build_over(){
+                    self.con_sites.pop();
+                    continue;
+                }
+                return Some(site)
+            }
         }
     }
 }

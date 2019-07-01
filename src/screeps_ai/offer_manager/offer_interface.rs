@@ -1,8 +1,6 @@
-use core::borrow::BorrowMut;
-use screeps_ai::offer_manager::WorkType::PointToPoint;
-use screeps_ai::offer_manager::{GroupEmployInfo, Manager, WorkType, WorkerState};
-use screeps_ai::{creep_manager, get_creep_manager, get_offer_manager};
-use std::collections::{BTreeMap, HashMap};
+use screeps_ai::offer_manager::{GroupEmployInfo, Manager, WorkerState};
+use screeps_ai::{creep_manager};
+use std::collections::{BTreeMap};
 
 impl Manager {
     pub fn new() -> Manager {
@@ -10,14 +8,12 @@ impl Manager {
             offer_list: BTreeMap::new(),
             current_number: 0,
             max_number: 0,
-            //            spawn_offers: HashMap::new(),
         }
     }
 
     pub fn init(&mut self) -> bool {
         self.init_default_offers();
         self.init_worker_action();
-
         true
     }
 
@@ -62,7 +58,7 @@ impl Manager {
     pub fn offer_creep(&mut self, name: &str, offer: &mut GroupEmployInfo) {
         offer
             .workers
-            .insert(name.clone(), WorkerState::DoSourceWork);
+            .insert(name.to_string(), WorkerState::DoSourceWork);
         self.current_number += 1;
 
         info!("new creep:{}, offer type:{:#?}", name, offer.offer_type);

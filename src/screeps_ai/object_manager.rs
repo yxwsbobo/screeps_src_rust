@@ -1,5 +1,4 @@
 use screeps_ai::common::Position;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -47,6 +46,7 @@ pub struct Manager {
     objects: HashMap<String, Rc<ObjectBasicInfo>>,
     room_objects: HashMap<String, Rc<screeps::objects::RoomObject>>,
 
+    con_sites:Vec<Rc<ObjectBasicInfo>>,
     sources_lists: Vec<Rc<ObjectBasicInfo>>,
     source_range: HashMap<String, Vec<Rc<ObjectBasicInfo>>>,
 }

@@ -2,13 +2,13 @@ use screeps_ai::offer_manager::{GroupEmployInfo, Manager, WorkType};
 use std::collections::HashMap;
 
 impl Manager {
-    pub fn delete_deploy_info_use_flag(&mut self, flag: String) {
-        //Todo
-        //        let level;
-        //        for office in &mut self.office_list {
-        //
-        //        }
-    }
+//    pub fn delete_deploy_info_use_flag(&mut self, flag: String) {
+//        //Todo
+//        //        let level;
+//        //        for office in &mut self.office_list {
+//        //
+//        //        }
+//    }
 
     //    pub fn
 }

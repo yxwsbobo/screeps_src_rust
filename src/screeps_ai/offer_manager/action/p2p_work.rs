@@ -1,5 +1,4 @@
-use screeps_ai::object_manager::{ObjectBasicInfo, ScreepsObjectType};
-use screeps_ai::offer_manager::{ActionType, Manager, PointToPointWorkInfo, WorkerState};
+use screeps_ai::offer_manager::{Manager, PointToPointWorkInfo, WorkerState};
 
 impl Manager {
     pub(crate) fn creep_do_p2p_work(
@@ -24,11 +23,11 @@ impl Manager {
             }
 
             WorkerState::DoSourceWork => {
-                Manager::creep_do_work(creep, info.source, &info.source_action);
+                Manager::creep_do_work(creep, &info.source, &info.source_action);
             }
 
             WorkerState::DoTargetWork => {
-                Manager::creep_do_work(creep, info.target, &info.target_action);
+                Manager::creep_do_work(creep, &info.target, &info.target_action);
             }
         }
     }
