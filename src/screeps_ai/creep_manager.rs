@@ -27,7 +27,7 @@ pub struct Manager {
     //    level:usize,
 }
 
-const NORMAL_CREEP_BODY: ([Part; 4], [Part; 6]) = (
+const NORMAL_CREEP_BODY: ([Part; 4], [Part; 6], [Part; 12]) = (
     [Part::Work, Part::Work, Part::Carry, Part::Move],
     [
         Part::Work,
@@ -37,10 +37,27 @@ const NORMAL_CREEP_BODY: ([Part; 4], [Part; 6]) = (
         Part::Carry,
         Part::Move,
     ],
+    [
+        Part::Work,
+        Part::Work,
+        Part::Work,
+        Part::Work,
+        Part::Work,
+        Part::Work,
+        Part::Carry,
+        Part::Carry,
+        Part::Move,
+        Part::Move,
+        Part::Move,
+        Part::Move,
+    ],
 );
 
-const NORMAL_CREEP_BODY_INFO: [(&[Part], u32); 2] =
-    [(&NORMAL_CREEP_BODY.0, 300), (&NORMAL_CREEP_BODY.1, 500)];
+const NORMAL_CREEP_BODY_INFO: [(&[Part], u32); 3] = [
+    (&NORMAL_CREEP_BODY.0, 300),
+    (&NORMAL_CREEP_BODY.1, 500),
+    (&NORMAL_CREEP_BODY.2, 900),
+];
 
 impl Manager {
     pub fn new() -> Manager {

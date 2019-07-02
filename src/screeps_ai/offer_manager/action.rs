@@ -5,6 +5,7 @@ mod p2p_work;
 use super::Manager;
 
 use screeps_ai::get_offer_manager;
+use screeps_ai::offer_manager::offer_interface::get_offer_mut;
 use screeps_ai::offer_manager::{WorkType, WorkerState};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -53,7 +54,11 @@ impl Manager {
         creeps: &HashMap<String, screeps::objects::Creep>,
     ) {
         match &work_type {
-            WorkType::BuildAll(v) | WorkType::PointToPoint(v) | WorkType::ExtensionTransfer(v)|WorkType::NormalTransfer(v)|WorkType::RepairAll(v) => {
+            WorkType::BuildAll(v)
+            | WorkType::PointToPoint(v)
+            | WorkType::ExtensionTransfer(v)
+            | WorkType::NormalTransfer(v)
+            | WorkType::RepairAll(v) => {
                 for (name, state) in workers {
                     if let Some(creep) = creeps.get(&name.clone()) {
                         if creep.spawning() {
@@ -103,7 +108,7 @@ impl Manager {
                     }
                 }
 
-                let workers = &mut Rc::get_mut( offer_info).expect("impossible in get workers").workers;
+                let workers = &mut get_offer_mut(offer_info).workers;
 
                 Manager::creeps_do_work_impl(workers, &offer_type, &mut lose_creeps, &creeps);
             }

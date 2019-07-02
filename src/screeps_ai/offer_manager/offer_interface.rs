@@ -1,6 +1,14 @@
+use core::borrow::BorrowMut;
 use screeps_ai::creep_manager;
 use screeps_ai::offer_manager::{GroupEmployInfo, Manager, WorkerState};
 use std::collections::BTreeMap;
+use std::rc::Rc;
+
+pub fn get_offer_mut(offer: &Rc<GroupEmployInfo>) -> &mut GroupEmployInfo {
+    {
+        unsafe { &mut *(&**offer as *const _ as *mut GroupEmployInfo) }
+    }
+}
 
 impl Manager {
     pub fn new() -> Manager {
@@ -17,6 +25,10 @@ impl Manager {
         true
     }
 
+    pub fn check_worker_empty(&self) -> bool {
+        self.current_number <= 1
+    }
+
     pub fn check_worker_full(&self) -> bool {
         self.current_number >= self.max_number
     }
@@ -24,7 +36,7 @@ impl Manager {
     pub fn find_next_offer_from_exist(
         &mut self,
         creep: &screeps::objects::Creep,
-    ) -> Option<&mut GroupEmployInfo> {
+    ) -> Option<&mut Rc<GroupEmployInfo>> {
         if self.check_worker_full() {
             return None;
         }
@@ -41,7 +53,7 @@ impl Manager {
     pub fn find_next_offer(
         &mut self,
         spawn: &screeps::objects::StructureSpawn,
-    ) -> Option<&mut GroupEmployInfo> {
+    ) -> Option<&mut Rc<GroupEmployInfo>> {
         if self.check_worker_full() {
             return None;
         }
@@ -55,8 +67,8 @@ impl Manager {
         None
     }
 
-    pub fn offer_creep(&mut self, name: &str, offer: &mut GroupEmployInfo) {
-        offer
+    pub fn offer_creep(&mut self, name: &str, offer: &mut Rc<GroupEmployInfo>) {
+        get_offer_mut(offer)
             .workers
             .insert(name.to_string(), WorkerState::DoSourceWork);
         self.current_number += 1;
@@ -68,7 +80,7 @@ impl Manager {
         for (_, offers) in &mut self.offer_list {
             for offer in offers {
                 if offer.workers.contains_key(name) {
-                    offer.workers.remove(name);
+                    get_offer_mut(offer).workers.remove(name);
                     self.current_number -= 1;
                     info!("died creep: {}", name);
                     creep_manager::Manager::cleanup_memory(name);

@@ -5,7 +5,6 @@ use screeps_ai::offer_manager::{ActionType, Manager};
 
 impl Manager {
     pub fn is_invalid_action(target_id: &str, action: &ActionType) -> bool {
-
         match &get_object_manager().get_game_object(target_id) {
             None => true,
             Some(target) => {
@@ -35,7 +34,7 @@ impl Manager {
                     ActionType::WithDraw => {}
                 }
                 false
-            },
+            }
         }
     }
 
@@ -45,7 +44,9 @@ impl Manager {
         action: &ActionType,
     ) {
         let obj_manager = get_object_manager();
-        let target = obj_manager.get_game_object(&target_info.id).expect("creep_do_work can't find obj");
+        let target = obj_manager
+            .get_game_object(&target_info.id)
+            .expect("creep_do_work can't find obj");
 
         let mut result = screeps::ReturnCode::Other;
 
@@ -152,7 +153,10 @@ impl Manager {
             screeps::ReturnCode::NoBodypart => {}
             screeps::ReturnCode::NotEnough | screeps::ReturnCode::Full => {}
             _ => {
-                info!("action error :{:#?}", result);
+                info!(
+                    "action error :{:#?}, target: {:#?}, action: {:#?}",
+                    result, target_info, action
+                );
             }
         }
     }

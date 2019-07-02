@@ -1,9 +1,8 @@
+use screeps::{prelude::*, Part, ReturnCode};
 
-use screeps::{prelude::*, ReturnCode, Part};
-
-use super::{Manager};
-use screeps_ai::{get_offer_manager, object_manager};
+use super::Manager;
 use screeps_ai::creep_manager::NORMAL_CREEP_BODY_INFO;
+use screeps_ai::{get_offer_manager, object_manager};
 //use screeps_ai::creep_manager::{EnergySourceInfo, EnergySourceType};
 
 impl Manager {
@@ -23,11 +22,19 @@ impl Manager {
         };
     }
 
-    fn get_room_build_body(room:&screeps::objects::Room) ->(bool,&'static [Part]){
-        if room.energy_available() > NORMAL_CREEP_BODY_INFO[0].1 {
-            (true,&NORMAL_CREEP_BODY_INFO[0].0)
-        }else{
-            (false, &NORMAL_CREEP_BODY_INFO[0].0)
+    fn get_room_build_body(room: &screeps::objects::Room) -> (bool, &'static [Part]) {
+        if get_offer_manager().check_worker_empty() {
+            if room.energy_available() >= NORMAL_CREEP_BODY_INFO[0].1 {
+                (true, &NORMAL_CREEP_BODY_INFO[0].0)
+            } else {
+                (false, &NORMAL_CREEP_BODY_INFO[0].0)
+            }
+        } else {
+            if room.energy_available() >= NORMAL_CREEP_BODY_INFO[2].1 {
+                (true, &NORMAL_CREEP_BODY_INFO[2].0)
+            } else {
+                (false, &NORMAL_CREEP_BODY_INFO[2].0)
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 mod basic_offers;
 use screeps::{HasId, OwnedStructureProperties};
-use screeps_ai::object_manager::{ScreepsObjectType, ObjectBasicInfo};
+use screeps_ai::object_manager::{ObjectBasicInfo, ScreepsObjectType};
+use screeps_ai::offer_manager::offer_interface::get_offer_mut;
 use screeps_ai::offer_manager::{
     ActionType, GroupEmployInfo, Manager, PointToPointWorkInfo, WorkType,
 };
@@ -8,38 +9,38 @@ use screeps_ai::{get_object_manager, get_offer_manager, object_manager};
 use std::rc::Rc;
 
 impl Manager {
-//    fn add_range_target_offer(
-//        &mut self,
-//        level:i32,
-//        source_action:ActionType,
-//        target_action:ActionType,
-//        offer_type:WorkType,
-//        max_num:usize){
-//
-//        let temp_target = get_object_manager().get_first_spawn();
-//        let mut employ_info = GroupEmployInfo::new();
-//        let p2p = PointToPointWorkInfo {
-//            source: temp_target.clone(),
-//            source_action,
-//            target: temp_target,
-//            target_action,
-//        };
-//
-//        employ_info.offer_type = offer_type;
-//        employ_info.max_number = max_num;
-//
-//        let offers = self.offer_list.entry(level).or_default();
-//        offers.push(employ_info);
-//
-//    }
+    //    fn add_range_target_offer(
+    //        &mut self,
+    //        level:i32,
+    //        source_action:ActionType,
+    //        target_action:ActionType,
+    //        offer_type:WorkType,
+    //        max_num:usize){
+    //
+    //        let temp_target = get_object_manager().get_empty_basic_info();
+    //        let mut employ_info = GroupEmployInfo::new();
+    //        let p2p = PointToPointWorkInfo {
+    //            source: temp_target.clone(),
+    //            source_action,
+    //            target: temp_target,
+    //            target_action,
+    //        };
+    //
+    //        employ_info.offer_type = offer_type;
+    //        employ_info.max_number = max_num;
+    //
+    //        let offers = self.offer_list.entry(level).or_default();
+    //        offers.push(employ_info);
+    //
+    //    }
 
     fn add_target_offer_use_source(
         &mut self,
-        level:i32,
+        level: i32,
         target_id: String,
-        target_action:ActionType,
-        max_number: usize){
-
+        target_action: ActionType,
+        max_number: usize,
+    ) {
         let obj_manager = get_object_manager();
 
         let source = obj_manager.get_object_to_source(&target_id)[0].clone();
@@ -138,7 +139,7 @@ impl Manager {
     }
 
     fn init_build_offer(&mut self) {
-        let temp_target = get_object_manager().get_first_spawn();
+        let temp_target = get_object_manager().get_empty_basic_info();
         let mut employ_info = GroupEmployInfo::new();
         let p2p = PointToPointWorkInfo {
             source: temp_target.clone(),
@@ -155,7 +156,7 @@ impl Manager {
     }
 
     fn init_extensions_offer(&mut self) {
-        let temp_target = get_object_manager().get_first_spawn();
+        let temp_target = get_object_manager().get_empty_basic_info();
         let mut employ_info = GroupEmployInfo::new();
         let p2p = PointToPointWorkInfo {
             source: temp_target.clone(),
@@ -181,46 +182,50 @@ impl Manager {
     }
 
     fn init_pausing_do(&mut self) {
-//        let level2 = 15;
-//        let level1 = 1;
-//        let level_builder = 13;
-//        let level_extension = 11;
-//        let controller_offer = get_offer_manager().offer_list.get(&level2).expect("fix me");
-//
-//        info!("offer lists: {:#?}", self.offer_list);
-//        let spawn_offer = self.offer_list.get_mut(&level1).expect("fix me2");
-//        spawn_offer[0].next_offer = Some(&controller_offer[0]);
-//
-//        let self_controller = self.offer_list.get_mut(&level2).expect("fix me3");
-//        self_controller[0].next_offer = Some(&controller_offer[1]);
-//
-//        let self_builder = self.offer_list.get_mut(&level_builder).expect("fix me4");
-//        self_builder[0].next_offer = Some(&controller_offer[1]);
-//
-//        let self_extension = self.offer_list.get_mut(&level_extension).expect("fix me5");
-//        self_extension[0].next_offer = Some(&controller_offer[0]);
+        //        let level2 = 15;
+        //        let level1 = 1;
+        //        let level_builder = 13;
+        //        let level_extension = 11;
+        //        let controller_offer = get_offer_manager().offer_list.get(&level2).expect("fix me");
+        //
+        //        let self_controller = self.offer_list.get_mut(&level2).expect("fix me3");
+        //
+        //        let spawn_offer = self.offer_list.get_mut(&level1).expect("fix me2");
+        //        Rc::get_mut(&mut spawn_offer[0]).expect("spawn_offer 1").next_offer = Some(&controller_offer[0]);
+        //
+        //        self_controller[0].next_offer = Some(&controller_offer[1]);
+        //
+        //        let self_builder = self.offer_list.get_mut(&level_builder).expect("fix me4");
+        //        self_builder[0].next_offer = Some(&controller_offer[1]);
+        //
+        //        let self_extension = self.offer_list.get_mut(&level_extension).expect("fix me5");
+        //        self_extension[0].next_offer = Some(&controller_offer[0]);
     }
 
     pub fn init_default_offers(&mut self) {
-
         self.init_basic_offer();
 
-        self.init_spawn_offer();
-        self.init_extensions_offer();
-
-        self.init_controller_offer();
-
-        self.init_build_offer();
-
-        self.init_pausing_do();
+        //        self.init_spawn_offer();
+        //        self.init_extensions_offer();
+        //
+        //        self.init_controller_offer();
+        //
+        //        self.init_build_offer();
+        //
+        //        self.init_pausing_do();
 
         self.init_workers_number();
     }
 
-    fn check_and_set_offer_pausing(p2p:&mut PointToPointWorkInfo, target:&Option<Rc<ObjectBasicInfo>> ) -> bool{
-        if Manager::is_invalid_action(&p2p.target.id,&p2p.target_action ) {
+    fn check_and_set_offer_pausing(
+        p2p: &mut PointToPointWorkInfo,
+        target: &Option<Rc<ObjectBasicInfo>>,
+    ) -> bool {
+        if Manager::is_invalid_action(&p2p.target.id, &p2p.target_action) {
             match target {
-                None => {true;},
+                None => {
+                    true;
+                }
                 Some(v_target) => {
                     p2p.target = v_target.clone();
                     p2p.source = get_object_manager().get_object_to_source(&v_target.id)[0].clone();
@@ -239,18 +244,19 @@ impl Manager {
                     || Manager::is_invalid_action(&v.target.id, &v.target_action)
             }
             WorkType::BuildAll(v) => {
-                Manager::check_and_set_offer_pausing(v,&get_object_manager().get_building_object())
-
-            },
+                Manager::check_and_set_offer_pausing(v, &get_object_manager().get_building_object())
+            }
             WorkType::CleanRoom => true,
-            WorkType::ExtensionTransfer(v) =>{
-                Manager::check_and_set_offer_pausing(v,&get_object_manager().get_extension_transfer_object())
-            }
-            WorkType::NormalTransfer(v) => {
-                Manager::check_and_set_offer_pausing(v,&get_object_manager().get_normal_transfer_object())
-            }
+            WorkType::ExtensionTransfer(v) => Manager::check_and_set_offer_pausing(
+                v,
+                &get_object_manager().get_extension_transfer_object(),
+            ),
+            WorkType::NormalTransfer(v) => Manager::check_and_set_offer_pausing(
+                v,
+                &get_object_manager().get_normal_transfer_object(),
+            ),
             WorkType::RepairAll(v) => {
-                Manager::check_and_set_offer_pausing(v,&get_object_manager().get_repair_object())
+                Manager::check_and_set_offer_pausing(v, &get_object_manager().get_repair_object())
             }
         }
     }
@@ -258,7 +264,7 @@ impl Manager {
     pub fn set_offer_state(&mut self) {
         for offers in self.offer_list.values_mut() {
             for offer in offers {
-                let offer = Rc::get_mut(offer).expect("impossible in set_offer_state");
+                let offer = get_offer_mut(offer);
                 offer.pausing = Manager::check_work_need_pausing(&mut offer.offer_type);
             }
         }

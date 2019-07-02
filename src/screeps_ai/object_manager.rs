@@ -6,6 +6,7 @@ mod object_interface;
 
 #[derive(Debug, Clone)]
 pub enum ScreepsObjectType {
+    Invalid,
     Unknown,
     Spawn,
     Creep,
