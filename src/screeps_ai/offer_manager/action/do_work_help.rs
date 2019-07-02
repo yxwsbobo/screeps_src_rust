@@ -5,36 +5,38 @@ use screeps_ai::offer_manager::{ActionType, Manager};
 
 impl Manager {
     pub fn is_invalid_action(target_id: &str, action: &ActionType) -> bool {
-        let obj_manager = get_object_manager();
-        let target = obj_manager.get_game_object(target_id);
 
-        match action {
-            ActionType::Harvest => return target.energy_empty(),
-            ActionType::Transfer(_) => return target.energy_full(),
-            ActionType::UpgradeController => return false,
-            ActionType::Renew => {}
-            ActionType::Attack => {}
-            ActionType::AttackController => {}
-            ActionType::RangeAttack => {}
-            ActionType::RangedMassAttack => {}
-            ActionType::RangeHeal => {}
-            ActionType::Build => return false,
-            ActionType::ClaimController => {}
-            ActionType::Dismantle => {}
-            ActionType::Drop => {}
-            ActionType::GenerateSafeMode => {}
-            ActionType::Heal => {}
-            ActionType::PickUp => {}
-            ActionType::Pull => {}
-            ActionType::Repair => {}
-            ActionType::ReserveController => {}
-            ActionType::Say => {}
-            ActionType::SignController => {}
-            ActionType::Suicide => {}
-            ActionType::WithDraw => {}
+        match &get_object_manager().get_game_object(target_id) {
+            None => true,
+            Some(target) => {
+                match action {
+                    ActionType::Harvest => return target.energy_empty(),
+                    ActionType::Transfer(_) => return target.energy_full(),
+                    ActionType::UpgradeController => return false,
+                    ActionType::Renew => {}
+                    ActionType::Attack => {}
+                    ActionType::AttackController => {}
+                    ActionType::RangeAttack => {}
+                    ActionType::RangedMassAttack => {}
+                    ActionType::RangeHeal => {}
+                    ActionType::Build => return target.build_over(),
+                    ActionType::ClaimController => {}
+                    ActionType::Dismantle => {}
+                    ActionType::Drop => {}
+                    ActionType::GenerateSafeMode => {}
+                    ActionType::Heal => {}
+                    ActionType::PickUp => {}
+                    ActionType::Pull => {}
+                    ActionType::Repair => {}
+                    ActionType::ReserveController => {}
+                    ActionType::Say => {}
+                    ActionType::SignController => {}
+                    ActionType::Suicide => {}
+                    ActionType::WithDraw => {}
+                }
+                false
+            },
         }
-
-        false
     }
 
     pub fn creep_do_work(
@@ -43,7 +45,7 @@ impl Manager {
         action: &ActionType,
     ) {
         let obj_manager = get_object_manager();
-        let target = obj_manager.get_game_object(&target_info.id);
+        let target = obj_manager.get_game_object(&target_info.id).expect("creep_do_work can't find obj");
 
         let mut result = screeps::ReturnCode::Other;
 

@@ -179,8 +179,8 @@ impl Manager {
         }
     }
 
-    pub fn get_first_source(&self) -> Rc<ObjectBasicInfo> {
-        self.structures_lists[ScreepsObjectType::Source as usize][0].clone()
+    pub fn get_first_spawn(&self) -> Rc<ObjectBasicInfo> {
+        self.structures_lists[ScreepsObjectType::Spawn as usize][0].clone()
     }
 
     pub fn get_object(&mut self, id: &str) -> Rc<ObjectBasicInfo> {
@@ -188,7 +188,7 @@ impl Manager {
             return v.clone();
         }
 
-        let obj = self.get_game_object(id);
+        let obj = self.get_game_object(id).expect("get_object error in net game object");
 
         let basic_info = Rc::new(ObjectBasicInfo {
             obj_type: ScreepsObjectType::Unknown,
@@ -216,13 +216,20 @@ impl Manager {
         sl
     }
 
-    pub fn get_game_object(self: &mut Self, id: &str) -> Rc<screeps::objects::RoomObject> {
-        self.room_objects
-            .entry(id.to_string())
-            .or_insert(Rc::new(
-                screeps::game::get_object_erased(id).expect("get_game_object not found"),
-            ))
-            .clone()
+    pub fn get_game_object(self: &mut Self, id: &str) -> Option<Rc<screeps::objects::RoomObject>> {
+        if let Some(v) = self.room_objects.get(id){
+            return Some(v.clone());
+        }
+
+        match screeps::game::get_object_erased(id) {
+            Some(v) => {
+                let obj = Rc::new(v);
+                self.room_objects.insert(id.to_string(),obj.clone());
+                Some(obj)
+            },
+            None => None,
+
+        }
     }
 
     pub fn get_structures(&self, obj_type: ScreepsObjectType) -> Vec<Rc<ObjectBasicInfo>> {
@@ -233,7 +240,15 @@ impl Manager {
         &self.structures_lists[obj_type as usize]
     }
 
-    pub fn get_transfer_object(&self) -> Option<Rc<ObjectBasicInfo>> {
+    pub fn get_normal_transfer_object(&self) -> Option<Rc<ObjectBasicInfo>>{
+        None
+    }
+
+    pub fn get_repair_object(&self) ->Option<Rc<ObjectBasicInfo>>{
+        None
+    }
+
+    pub fn get_extension_transfer_object(&self) -> Option<Rc<ObjectBasicInfo>> {
         let mut need_transfer = false;
         let rooms: &Vec<screeps::objects::Room> = &screeps::game::rooms::values();
         for room in rooms {
@@ -276,6 +291,13 @@ impl Manager {
                         - 1]
                     .clone();
                 let site_obj = self.get_game_object(&site.id);
+                if let None = site_obj{
+                    //Todo Build over
+                    self.structures_lists[ScreepsObjectType::ConstructionSites as usize].pop();
+                    continue;
+                }
+
+                let site_obj = &site_obj.unwrap();
 
                 if site_obj.build_over() {
                     self.structures_lists[ScreepsObjectType::ConstructionSites as usize].pop();

@@ -1,8 +1,9 @@
 
-use screeps::{prelude::*, ReturnCode};
+use screeps::{prelude::*, ReturnCode, Part};
 
 use super::{Manager};
 use screeps_ai::{get_offer_manager, object_manager};
+use screeps_ai::creep_manager::NORMAL_CREEP_BODY_INFO;
 //use screeps_ai::creep_manager::{EnergySourceInfo, EnergySourceType};
 
 impl Manager {
@@ -22,19 +23,28 @@ impl Manager {
         };
     }
 
+    fn get_room_build_body(room:&screeps::objects::Room) ->(bool,&'static [Part]){
+        if room.energy_available() > NORMAL_CREEP_BODY_INFO[0].1 {
+            (true,&NORMAL_CREEP_BODY_INFO[0].0)
+        }else{
+            (false, &NORMAL_CREEP_BODY_INFO[0].0)
+        }
+    }
+
     pub fn check_create_creep(&mut self) {
         if get_offer_manager().check_worker_full() {
             return;
         }
 
         for spawn in &object_manager::Manager::get_my_spawns() {
-            if spawn.energy() >= self.normal_body.1 {
+            let body = Manager::get_room_build_body(&spawn.room());
+            if body.0 {
                 match get_offer_manager().find_next_offer(spawn) {
                     None => return,
                     Some(v) => {
                         // create a unique name, spawn.
                         let name = format!("{}-{}", spawn.name(), screeps::game::time());
-                        let res = spawn.spawn_creep(self.normal_body.0, &name);
+                        let res = spawn.spawn_creep(body.1, &name);
 
                         if res != ReturnCode::Ok {
                             warn!("couldn't spawn: {:?}", res);

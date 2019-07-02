@@ -56,7 +56,9 @@ pub enum WorkType {
     UnKnown,
     PointToPoint(PointToPointWorkInfo),
     BuildAll(PointToPointWorkInfo),
-    TransferAll(PointToPointWorkInfo),
+    ExtensionTransfer(PointToPointWorkInfo),
+    RepairAll(PointToPointWorkInfo),
+    NormalTransfer(PointToPointWorkInfo),
     CleanRoom,
 }
 

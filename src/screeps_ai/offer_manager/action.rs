@@ -52,7 +52,7 @@ impl Manager {
         creeps: &HashMap<String, screeps::objects::Creep>,
     ) {
         match &work_type {
-            WorkType::BuildAll(v) | WorkType::PointToPoint(v) | WorkType::TransferAll(v) => {
+            WorkType::BuildAll(v) | WorkType::PointToPoint(v) | WorkType::ExtensionTransfer(v)|WorkType::NormalTransfer(v)|WorkType::RepairAll(v) => {
                 for (name, state) in workers {
                     if let Some(creep) = creeps.get(&name.clone()) {
                         if creep.spawning() {
