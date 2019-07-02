@@ -1,6 +1,7 @@
 use screeps_ai::offer_manager::{Manager, ActionType, GroupEmployInfo, PointToPointWorkInfo, WorkType};
 use screeps_ai::{get_object_manager, get_offer_manager};
 use screeps_ai::object_manager::ScreepsObjectType;
+use std::rc::Rc;
 
 const BASIC_SPAWN_OFFER_LEVEL: i32 = -100;
 const BASIC_EXTENSION_OFFER_LEVEL:i32 = -99;
@@ -47,7 +48,7 @@ impl Manager {
         employ_info.max_number = 1;
 
         let offers = self.offer_list.entry(BASIC_EXTENSION_OFFER_LEVEL).or_default();
-        offers.push(employ_info);
+        offers.push(Rc::new(employ_info));
     }
 
     fn basic_build_offer(&mut self){
@@ -64,7 +65,7 @@ impl Manager {
         employ_info.max_number = 0;
 
         let offers = self.offer_list.entry(BASIC_BUILD_OFFER_LEVEL).or_default();
-        offers.push(employ_info);
+        offers.push(Rc::new(employ_info));
     }
 
     fn basic_normal_transfer(&mut self){
@@ -81,7 +82,7 @@ impl Manager {
         employ_info.max_number = 1;
 
         let offers = self.offer_list.entry(BASIC_NORMAL_TRANSFER_OFFER_LEVEL).or_default();
-        offers.push(employ_info);
+        offers.push(Rc::new(employ_info));
     }
 
     fn basic_repair_offer(&mut self){
@@ -98,7 +99,7 @@ impl Manager {
         employ_info.max_number = 1;
 
         let offers = self.offer_list.entry(BASIC_REPAIR_OFFER_LEVEL).or_default();
-        offers.push(employ_info);
+        offers.push(Rc::new(employ_info));
     }
 
     fn basic_on_pausing(&mut self){

@@ -19,7 +19,7 @@ impl GroupEmployInfo {
             pausing: false,
             workers: HashMap::new(),
             max_number: 0,
-            next_offer: None,
+            next_offer: Default::default(),
             offer_type: WorkType::UnKnown,
         }
     }

@@ -5,7 +5,7 @@ mod offer_interface;
 
 use screeps_ai::object_manager::ObjectBasicInfo;
 use std::collections::{BTreeMap, HashMap};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 #[derive(Debug, Clone)]
 pub struct PointToPointWorkInfo {
@@ -68,11 +68,11 @@ pub struct GroupEmployInfo {
     workers: HashMap<String, WorkerState>,
     max_number: usize,
     offer_type: WorkType,
-    next_offer: Option<&'static GroupEmployInfo>,
+    next_offer: Weak<GroupEmployInfo>,
 }
 
 pub struct Manager {
-    offer_list: BTreeMap<i32, Vec<GroupEmployInfo>>,
+    offer_list: BTreeMap<i32, Vec<Rc<GroupEmployInfo>>>,
     current_number: usize,
     max_number: usize,
 }

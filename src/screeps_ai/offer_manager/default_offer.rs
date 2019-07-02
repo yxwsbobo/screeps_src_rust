@@ -57,7 +57,7 @@ impl Manager {
         employ_info.max_number = max_number;
 
         let offers = self.offer_list.entry(level).or_default();
-        offers.push(employ_info);
+        offers.push(Rc::new(employ_info));
     }
 
     fn add_offer_info(
@@ -101,7 +101,7 @@ impl Manager {
             } else {
                 number2
             };
-            offers.push(employ_info);
+            offers.push(Rc::new(employ_info));
         }
     }
 
@@ -151,7 +151,7 @@ impl Manager {
         employ_info.max_number = 3;
 
         let offers = self.offer_list.entry(13).or_default();
-        offers.push(employ_info);
+        offers.push(Rc::new(employ_info));
     }
 
     fn init_extensions_offer(&mut self) {
@@ -168,7 +168,7 @@ impl Manager {
         employ_info.max_number = 3;
 
         let offers = self.offer_list.entry(11).or_default();
-        offers.push(employ_info);
+        offers.push(Rc::new(employ_info));
     }
 
     fn init_workers_number(&mut self) {
@@ -181,24 +181,24 @@ impl Manager {
     }
 
     fn init_pausing_do(&mut self) {
-        let level2 = 15;
-        let level1 = 1;
-        let level_builder = 13;
-        let level_extension = 11;
-        let controller_offer = get_offer_manager().offer_list.get(&level2).expect("fix me");
-
-        info!("offer lists: {:#?}", self.offer_list);
-        let spawn_offer = self.offer_list.get_mut(&level1).expect("fix me2");
-        spawn_offer[0].next_offer = Some(&controller_offer[0]);
-
-        let self_controller = self.offer_list.get_mut(&level2).expect("fix me3");
-        self_controller[0].next_offer = Some(&controller_offer[1]);
-
-        let self_builder = self.offer_list.get_mut(&level_builder).expect("fix me4");
-        self_builder[0].next_offer = Some(&controller_offer[1]);
-
-        let self_extension = self.offer_list.get_mut(&level_extension).expect("fix me5");
-        self_extension[0].next_offer = Some(&controller_offer[0]);
+//        let level2 = 15;
+//        let level1 = 1;
+//        let level_builder = 13;
+//        let level_extension = 11;
+//        let controller_offer = get_offer_manager().offer_list.get(&level2).expect("fix me");
+//
+//        info!("offer lists: {:#?}", self.offer_list);
+//        let spawn_offer = self.offer_list.get_mut(&level1).expect("fix me2");
+//        spawn_offer[0].next_offer = Some(&controller_offer[0]);
+//
+//        let self_controller = self.offer_list.get_mut(&level2).expect("fix me3");
+//        self_controller[0].next_offer = Some(&controller_offer[1]);
+//
+//        let self_builder = self.offer_list.get_mut(&level_builder).expect("fix me4");
+//        self_builder[0].next_offer = Some(&controller_offer[1]);
+//
+//        let self_extension = self.offer_list.get_mut(&level_extension).expect("fix me5");
+//        self_extension[0].next_offer = Some(&controller_offer[0]);
     }
 
     pub fn init_default_offers(&mut self) {
@@ -258,6 +258,7 @@ impl Manager {
     pub fn set_offer_state(&mut self) {
         for offers in self.offer_list.values_mut() {
             for offer in offers {
+                let offer = Rc::get_mut(offer).expect("impossible in set_offer_state");
                 offer.pausing = Manager::check_work_need_pausing(&mut offer.offer_type);
             }
         }

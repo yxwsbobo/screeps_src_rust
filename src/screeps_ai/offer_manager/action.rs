@@ -7,6 +7,7 @@ use super::Manager;
 use screeps_ai::get_offer_manager;
 use screeps_ai::offer_manager::{WorkType, WorkerState};
 use std::collections::HashMap;
+use std::rc::Rc;
 
 impl Manager {
     fn init_workers(&mut self) {
@@ -80,19 +81,18 @@ impl Manager {
 
         for offers in self.offer_list.values_mut() {
             for offer_info in offers {
-                let workers = &mut offer_info.workers;
-                let mut offer_type = &offer_info.offer_type;
+                let mut offer_type = offer_info.offer_type.clone();
 
                 if offer_info.pausing {
-                    let mut current_group = offer_info.next_offer;
+                    let mut current_group = offer_info.next_offer.upgrade();
                     loop {
-                        match current_group {
+                        match &current_group {
                             None => break,
                             Some(v) => {
                                 if v.pausing {
-                                    current_group = v.next_offer;
+                                    current_group = v.next_offer.upgrade();
                                 } else {
-                                    offer_type = &v.offer_type;
+                                    offer_type = v.offer_type.clone();
                                     break;
                                 }
                             }
@@ -103,7 +103,9 @@ impl Manager {
                     }
                 }
 
-                Manager::creeps_do_work_impl(workers, offer_type, &mut lose_creeps, &creeps);
+                let workers = &mut Rc::get_mut( offer_info).expect("impossible in get workers").workers;
+
+                Manager::creeps_do_work_impl(workers, &offer_type, &mut lose_creeps, &creeps);
             }
         }
 
