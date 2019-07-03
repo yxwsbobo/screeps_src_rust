@@ -17,6 +17,10 @@ impl Manager {
             }
         }
 
+        if screeps::game::time() % 40 == 0{
+            info!("creep: {}, work info: {:#?}, state: {:#?}", creep.name(), info, state);
+        }
+
         match state {
             WorkerState::StupidWorker => {
                 info!("StupidWorker do nothing");

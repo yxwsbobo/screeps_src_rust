@@ -22,19 +22,35 @@ impl Manager {
         };
     }
 
+    fn get_max_body(max_money:u32)->&'static (&'static [Part],u32){
+        let mut start_info = &NORMAL_CREEP_BODY_INFO[0];
+
+        for body_info in &NORMAL_CREEP_BODY_INFO {
+            if max_money >= start_info.1 &&
+                max_money < body_info.1{
+                break;
+            }
+            start_info = body_info;
+        }
+
+        start_info
+    }
+
     fn get_room_build_body(room: &screeps::objects::Room) -> (bool, &'static [Part]) {
-        if get_offer_manager().check_worker_empty() {
-            if room.energy_available() >= NORMAL_CREEP_BODY_INFO[0].1 {
-                (true, &NORMAL_CREEP_BODY_INFO[0].0)
+        let room_energy:u32 = room.energy_available();
+
+        if get_offer_manager().check_in_survival() {
+            if room_energy >= NORMAL_CREEP_BODY_INFO[0].1 {
+                return (true, &NORMAL_CREEP_BODY_INFO[0].0)
             } else {
-                (false, &NORMAL_CREEP_BODY_INFO[0].0)
+                return (false, &NORMAL_CREEP_BODY_INFO[0].0)
             }
-        } else {
-            if room.energy_available() >= NORMAL_CREEP_BODY_INFO[2].1 {
-                (true, &NORMAL_CREEP_BODY_INFO[2].0)
-            } else {
-                (false, &NORMAL_CREEP_BODY_INFO[2].0)
-            }
+        }
+        let need_body = Manager::get_max_body(room.energy_capacity_available());
+        if room_energy >= need_body.1{
+            (true, need_body.0)
+        }else{
+            return (false, &NORMAL_CREEP_BODY_INFO[0].0)
         }
     }
 

@@ -86,9 +86,11 @@ impl Manager {
 
         for offers in self.offer_list.values_mut() {
             for offer_info in offers {
-                if screeps::game::time() % 10 == 0 {
-                    info!("in type: {:#?}", offer_info);
-                }
+//                if screeps::game::time() % 10 == 0 {
+//                    if !offer_info.workers.is_empty() {
+//                        info!("in type: {:#?}", offer_info);
+//                    }
+//                }
 
                 let mut offer_type = offer_info.offer_type.clone();
 
@@ -111,9 +113,11 @@ impl Manager {
                         continue;
                     }
                 }
-                if screeps::game::time() % 10 == 0 {
-                    info!("do offer: {:#?}", offer_type);
-                }
+//                if screeps::game::time() % 10 == 0 {
+//                    if !offer_info.workers.is_empty() {
+//                        info!("do offer: {:#?}", offer_type);
+//                    }
+//                }
 
                 let workers = &mut get_offer_mut(offer_info).workers;
 

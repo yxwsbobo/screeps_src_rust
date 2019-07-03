@@ -5,6 +5,7 @@ use screeps_ai::offer_manager;
 use screeps_ai::offer_manager::ActionType;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::any::Any;
 
 impl Manager {
     pub fn get_my_spawns() -> Vec<screeps::objects::StructureSpawn> {
@@ -17,6 +18,7 @@ impl Manager {
             source_range: Default::default(),
             room_objects: Default::default(),
             structures_lists: Default::default(),
+            new_structures_flag: 0,
         }
     }
 
@@ -25,10 +27,14 @@ impl Manager {
     }
 
     fn insert_object_info<T>(&mut self, obj: &T, obj_type: ScreepsObjectType)
-    where
-        T: screeps::objects::HasPosition + screeps::objects::HasId,
+        where
+            T: screeps::objects::HasPosition + screeps::objects::HasId,
     {
         let id = obj.id();
+        if self.objects.contains_key(&id){
+            return;
+        }
+
         let pos = &obj.pos();
 
         let basic_info = Rc::new(ObjectBasicInfo {
@@ -250,10 +256,47 @@ impl Manager {
     }
 
     pub fn get_normal_transfer_object(&self) -> Option<Rc<ObjectBasicInfo>> {
+        for tower in &self.structures_lists[ScreepsObjectType::Tower as usize] {
+            if offer_manager::Manager::is_invalid_action(
+                &tower.id,
+                &ActionType::Transfer(screeps::constants::ResourceType::Energy),
+            ) {
+                continue;
+            } else {
+                return Some(tower.clone());
+            }
+        }
+
+        for container in &self.structures_lists[ScreepsObjectType::Container as usize] {
+            if offer_manager::Manager::is_invalid_action(
+                &container.id,
+                &ActionType::Transfer(screeps::constants::ResourceType::Energy),
+            ) {
+                continue;
+            } else {
+                return Some(container.clone());
+            }
+        }
         None
     }
 
-    pub fn get_repair_object(&self) -> Option<Rc<ObjectBasicInfo>> {
+    pub fn get_repair_object(&mut self) -> Option<Rc<ObjectBasicInfo>> {
+        for container in self.structures_lists[ScreepsObjectType::Container as usize].clone() {
+            let obj = self.get_game_object(&container.id).expect("not find object in repair");
+            if obj.get_life_rate() < 0.1 {
+                return Some(container.clone());
+                continue;
+            }
+        }
+
+        for road in self.structures_lists[ScreepsObjectType::Road as usize].clone() {
+            let obj = self.get_game_object(&road.id).expect("not find object in repair");
+            if obj.get_life_rate() < 0.1 {
+                return Some(road.clone());
+                continue;
+            }
+        }
+
         None
     }
 
@@ -286,11 +329,24 @@ impl Manager {
         if self.structures_lists[ScreepsObjectType::ConstructionSites as usize].is_empty() {
             if screeps::game::time() % 30 == 0 {
                 self.init_objects_constructions();
+
+                if self.structures_lists[ScreepsObjectType::ConstructionSites as usize].is_empty() {
+                    return None;
+                }else{
+                    self.new_structures_flag = 0;
+                }
+            }else{
+                return None;
             }
         }
 
+        let mut updated_structures = false;
         loop {
             if self.structures_lists[ScreepsObjectType::ConstructionSites as usize].is_empty() {
+                if !updated_structures{
+                    self.init_structures();
+                    self.new_structures_flag = 0;
+                }
                 return None;
             } else {
                 let site =
@@ -298,17 +354,18 @@ impl Manager {
                         .structures_lists[ScreepsObjectType::ConstructionSites as usize]
                         .len()
                         - 1]
-                    .clone();
+                        .clone();
                 let site_obj = self.get_game_object(&site.id);
                 if let None = site_obj {
+                    self.new_structures_flag +=1;
                     //Todo Build over
-                    self.structures_lists[ScreepsObjectType::ConstructionSites as usize].pop();
-                    continue;
-                }
-
-                let site_obj = &site_obj.unwrap();
-
-                if site_obj.build_over() {
+                    if self.new_structures_flag % 5 == 0{
+                        if !updated_structures{
+                            updated_structures = true;
+                            self.init_structures();
+                            self.new_structures_flag = 0;
+                        }
+                    }
                     self.structures_lists[ScreepsObjectType::ConstructionSites as usize].pop();
                     continue;
                 }

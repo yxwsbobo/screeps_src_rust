@@ -51,4 +51,6 @@ pub struct Manager {
     structures_lists: [Vec<Rc<ObjectBasicInfo>>; ScreepsObjectType::LastFlag as usize],
 
     source_range: HashMap<String, Vec<Rc<ObjectBasicInfo>>>,
+
+    new_structures_flag:i32,
 }

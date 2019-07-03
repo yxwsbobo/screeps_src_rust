@@ -25,7 +25,7 @@ impl Manager {
         true
     }
 
-    pub fn check_worker_empty(&self) -> bool {
+    pub fn check_in_survival(&self) -> bool {
         self.current_number <= 1
     }
 
