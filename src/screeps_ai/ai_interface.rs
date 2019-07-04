@@ -16,6 +16,7 @@ impl SuperAI {
                     cp_manager: creep_manager::Manager::new(),
                     obj_manager: object_manager::Manager::new(),
                     offer_mgr: offer_manager::Manager::new(),
+                    current_tick: 0
                 })
             }
         }

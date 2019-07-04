@@ -7,7 +7,7 @@ use screeps_ai::offer_manager::{
 };
 use screeps_ai::{get_object_manager, get_offer_manager, object_manager};
 use std::rc::Rc;
-use screeps_ai::offer_manager::default_offer::basic_offers::{BASIC_UPGRADE_OFFER_LEVEL, BASIC_BUILD_OFFER_LEVEL};
+use screeps_ai::offer_manager::default_offer::basic_offers::{BASIC_UPGRADE_OFFER_LEVEL, BASIC_BUILD_OFFER_LEVEL, BASIC_NORMAL_TRANSFER_OFFER_LEVEL};
 
 impl Manager {
     fn add_target_offer_use_source(
@@ -40,7 +40,7 @@ impl Manager {
     fn init_spawn_offer(&mut self) {
         for spawn in get_object_manager().get_structures(ScreepsObjectType::Spawn) {
             self.add_target_offer_use_source(
-                1,
+                11,
                 spawn.id.clone(),
                 ActionType::Transfer(screeps::constants::ResourceType::Energy),
                 6,
@@ -49,9 +49,16 @@ impl Manager {
     }
 
     fn init_extensions_offer(&mut self) {
-        let employ_info = Manager::new_extension_employ(3);
+        let employ_info = Manager::new_extension_employ(6);
 
-        let offers = self.offer_list.entry(11).or_default();
+        let offers = self.offer_list.entry(1).or_default();
+        offers.push(employ_info);
+    }
+
+    fn init_transfer_offer(&mut self){
+        let employ_info = Manager::new_normal_transfer_employ(3);
+
+        let offers = self.offer_list.entry(20).or_default();
         offers.push(employ_info);
     }
 
@@ -65,22 +72,31 @@ impl Manager {
     }
 
     fn init_pausing_do(&mut self) {
-        let spawn_level = 1;
-        let extensions_level = 11;
+        let spawn_level = 11;
+        let extensions_level = 1;
+        let transfer_level = 20;
         for offer in self.offer_list.get(&spawn_level).expect("impossible in temp pausing") {
             Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_UPGRADE_OFFER_LEVEL));
         }
 
         for offer in self.offer_list.get(&extensions_level).expect("impossible in temp pausing2") {
-            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_BUILD_OFFER_LEVEL));
+            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_NORMAL_TRANSFER_OFFER_LEVEL));
         }
 
+//        for offer in self.offer_list.get(&transfer_level).expect("impossible in temp pausing3") {
+//            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_BUILD_OFFER_LEVEL));
+//        }
     }
 
     pub fn init_default_offers(&mut self) {
         self.init_basic_offer();
 
-                self.init_spawn_offer();
+        self.init_spawn_offer();
+        self.init_extensions_offer();
+//        self.init_transfer_offer();
+
+        self.init_pausing_do();
+
         //        self.init_extensions_offer();
         //
         //        self.init_controller_offer();
@@ -99,7 +115,7 @@ impl Manager {
         if Manager::is_invalid_action(&p2p.target.id, &p2p.target_action) {
             match target {
                 None => {
-                    true;
+                    return true;
                 }
                 Some(v_target) => {
                     p2p.target = v_target.clone();

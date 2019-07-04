@@ -9,9 +9,9 @@ use std::rc::Rc;
 pub const BASIC_SPAWN_OFFER_LEVEL: i32 = -1000;
 pub const BASIC_EXTENSION_OFFER_LEVEL: i32 = -999;
 pub const BASIC_UPGRADE_OFFER_LEVEL: i32 = 1000;
-pub const BASIC_REPAIR_OFFER_LEVEL: i32 = -500;
-pub const BASIC_NORMAL_TRANSFER_OFFER_LEVEL: i32 = -499;
-pub const BASIC_BUILD_OFFER_LEVEL: i32 = -498;
+pub const BASIC_REPAIR_OFFER_LEVEL: i32 = 990;
+pub const BASIC_NORMAL_TRANSFER_OFFER_LEVEL: i32 = 991;
+pub const BASIC_BUILD_OFFER_LEVEL: i32 = 992;
 
 impl Manager {
     pub fn new_extension_employ(max_num:usize) ->Rc<GroupEmployInfo>{
@@ -120,7 +120,7 @@ impl Manager {
             .offer_list
             .entry(BASIC_NORMAL_TRANSFER_OFFER_LEVEL)
             .or_default();
-        offers.push(employ_info);
+        offers.push(employ_info.clone());
     }
 
     fn basic_repair_offer(&mut self) {
@@ -130,6 +130,9 @@ impl Manager {
         offers.push(employ_info);
     }
 
+    pub fn get_basic_employ_index(&self, basic_type:i32,index: usize)->Rc<GroupEmployInfo>{
+        self.offer_list.get(&basic_type).expect("impossible in get_basic_employ")[index].clone()
+    }
 
     pub fn get_basic_employ(&self, basic_type:i32)->Rc<GroupEmployInfo>{
         self.offer_list.get(&basic_type).expect("impossible in get_basic_employ")[0].clone()

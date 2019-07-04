@@ -75,4 +75,5 @@ pub struct Manager {
     offer_list: BTreeMap<i32, Vec<Rc<GroupEmployInfo>>>,
     current_number: usize,
     max_number: usize,
+    offer_level: i32,
 }

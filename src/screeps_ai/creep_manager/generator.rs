@@ -22,7 +22,13 @@ impl Manager {
         };
     }
 
-    fn get_max_body(max_money:u32)->&'static (&'static [Part],u32){
+    fn get_max_body(mut max_money:u32)->&'static (&'static [Part],u32){
+        if max_money >= 600{
+            max_money -= 300;
+        }else{
+            return &NORMAL_CREEP_BODY_INFO[0];
+        }
+
         let mut start_info = &NORMAL_CREEP_BODY_INFO[0];
 
         for body_info in &NORMAL_CREEP_BODY_INFO {

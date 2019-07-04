@@ -34,6 +34,8 @@ pub enum ScreepsObjectType {
     Portal,
     Nuker,
 
+
+    EmptyExtensions,
     LastFlag,
 }
 

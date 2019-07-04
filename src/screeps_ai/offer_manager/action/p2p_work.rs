@@ -16,10 +16,10 @@ impl Manager {
                 *state = WorkerState::DoTargetWork;
             }
         }
-
-        if screeps::game::time() % 40 == 0{
-            info!("creep: {}, work info: {:#?}, state: {:#?}", creep.name(), info, state);
-        }
+//
+//        if screeps::game::time() % 40 == 0{
+//            info!("creep: {}, work info: {:#?}, state: {:#?}", creep.name(), info, state);
+//        }
 
         match state {
             WorkerState::StupidWorker => {

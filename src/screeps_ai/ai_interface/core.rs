@@ -1,4 +1,4 @@
-use screeps_ai::SuperAI;
+use screeps_ai::{SuperAI, get_tick, middle_time};
 
 #[derive(Debug)]
 struct MyHeapStatistics {
@@ -66,9 +66,27 @@ impl SuperAI {
         false
     }
 
+    fn check_game_level_changed(&mut self)->bool{
+        self.offer_mgr.check_offer_level()
+    }
+
+    fn set_tick_info(&mut self){
+        self.current_tick = screeps::game::time();
+        self.low_time = self.current_tick % 13 == 0;
+        self.middle_time = self.current_tick % 29 == 0;
+        self.long_time = self.current_tick % 59 == 0;
+    }
+
     pub(crate) fn ai_run_once(&mut self) {
+        self.set_tick_info();
         if !self.check_run_init() {
             return;
+        }
+
+        if self.long_time {
+            if self.check_game_level_changed(){
+                return;
+            }
         }
 
         debug!("start cost cpu: {}", screeps::game::cpu::get_used());

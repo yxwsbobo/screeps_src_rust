@@ -16,6 +16,24 @@ impl Manager {
             offer_list: BTreeMap::new(),
             current_number: 0,
             max_number: 0,
+            offer_level: 0
+        }
+    }
+
+    fn compute_game_level() -> i32{
+
+    }
+
+    pub fn check_offer_level(&mut self) ->bool{
+        let game_level = Manager::compute_game_level();
+        if self.offer_level != game_level {
+            self.offer_level = game_level;
+
+
+            true
+        }
+        else{
+            false
         }
     }
 
@@ -57,9 +75,10 @@ impl Manager {
         if self.check_worker_full() {
             return None;
         }
-        for (_, offers) in &mut self.offer_list {
+        for (level, offers) in &mut self.offer_list {
             for offer in offers {
                 if offer.workers.len() < offer.max_number {
+                    info!("new offer level: {}", level);
                     return Some(offer);
                 }
             }

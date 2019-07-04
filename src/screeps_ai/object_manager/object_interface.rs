@@ -1,7 +1,7 @@
 use screeps::{find, HasId, HasPosition, Structure, StructureType};
 use screeps_ai::common::Position;
 use screeps_ai::object_manager::{Manager, ObjectBasicInfo, ScreepsObjectType};
-use screeps_ai::offer_manager;
+use screeps_ai::{offer_manager, get_object_manager};
 use screeps_ai::offer_manager::ActionType;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -81,6 +81,17 @@ impl Manager {
                 Structure::Wall(v) => self.insert_object_info(v, ScreepsObjectType::Wall),
             }
         }
+
+        if !self.structures_lists[ScreepsObjectType::Source as usize].is_empty() {
+            self.sort_extension_list();
+        }
+    }
+
+    fn sort_extension_list(&mut self){
+        self.structures_lists[ScreepsObjectType::Extension as usize].sort_by_cached_key(|v|{
+            let source = get_object_manager().get_object_to_source(&v.id)[0].clone();
+            20000 - v.pool_diff_range(&source)
+        });
     }
 
     fn init_objects_in_room(&mut self) {
@@ -125,8 +136,7 @@ impl Manager {
         }
     }
 
-    fn init_objects_constructions(&mut self) {
-        self.structures_lists[ScreepsObjectType::ConstructionSites as usize].clear();
+    fn init_construction_sites(&mut self) {
         for construction in &screeps::game::construction_sites::values() {
             let id = construction.id();
             if let Some(v) = self.objects.get(&id) {
@@ -155,8 +165,10 @@ impl Manager {
     pub fn init(&mut self) -> bool {
         self.init_structures();
         self.init_objects_in_room();
-        self.init_objects_constructions();
+        self.init_construction_sites();
+        self.init_empty_extension();
         self.init_objects_spawns();
+        self.sort_extension_list();
 
         true
     }
@@ -300,18 +312,8 @@ impl Manager {
         None
     }
 
-    pub fn get_extension_transfer_object(&self) -> Option<Rc<ObjectBasicInfo>> {
-        let mut need_transfer = false;
-        let rooms: &Vec<screeps::objects::Room> = &screeps::game::rooms::values();
-        for room in rooms {
-            if room.energy_available() != room.energy_capacity_available() {
-                need_transfer = true;
-                break;
-            }
-        }
-        if !need_transfer {
-            return None;
-        }
+    fn init_empty_extension_imp(&mut self){
+        let mut temp_extensions:Vec<Rc<ObjectBasicInfo>> = Vec::new();
         for extension in &self.structures_lists[ScreepsObjectType::Extension as usize] {
             if offer_manager::Manager::is_invalid_action(
                 &extension.id,
@@ -319,25 +321,63 @@ impl Manager {
             ) {
                 continue;
             } else {
+                temp_extensions.push(extension.clone());
+            }
+        }
+        self.structures_lists[ScreepsObjectType::EmptyExtensions as usize] = temp_extensions;
+    }
+
+    fn init_empty_extension(&mut self) -> bool{
+        if self.structures_lists[ScreepsObjectType::EmptyExtensions as usize].is_empty() {
+            if screeps::game::time() % 7 == 0 {
+                self.init_empty_extension_imp();
+            }
+        }
+
+        self.structures_lists[ScreepsObjectType::EmptyExtensions as usize].is_empty()
+    }
+
+    pub fn get_extension_transfer_object(&mut self) -> Option<Rc<ObjectBasicInfo>> {
+        if self.init_empty_extension() {
+//            info!("not find extension can transfer1");
+            return None;
+        }
+
+        loop{
+            if self.structures_lists[ScreepsObjectType::EmptyExtensions as usize].is_empty() {
+//                info!("not find extension can transfer2");
+                break;
+            }
+
+            let extension = self.structures_lists[ScreepsObjectType::EmptyExtensions as usize]
+            [self.structures_lists[ScreepsObjectType::EmptyExtensions as usize].len()- 1].clone();
+
+            if offer_manager::Manager::is_invalid_action(
+                &extension.id,
+                &ActionType::Transfer(screeps::constants::ResourceType::Energy),
+            ) {
+                self.structures_lists[ScreepsObjectType::EmptyExtensions as usize].pop();
+                continue;
+            } else {
                 return Some(extension.clone());
             }
         }
+
         None
     }
 
-    pub fn get_building_object(&mut self) -> Option<Rc<ObjectBasicInfo>> {
+    fn init_building_object(&mut self)-> bool{
         if self.structures_lists[ScreepsObjectType::ConstructionSites as usize].is_empty() {
             if screeps::game::time() % 30 == 0 {
-                self.init_objects_constructions();
-
-                if self.structures_lists[ScreepsObjectType::ConstructionSites as usize].is_empty() {
-                    return None;
-                }else{
-                    self.new_structures_flag = 0;
-                }
-            }else{
-                return None;
+                self.init_construction_sites();
             }
+        }
+        self.structures_lists[ScreepsObjectType::ConstructionSites as usize].is_empty()
+    }
+
+    pub fn get_building_object(&mut self) -> Option<Rc<ObjectBasicInfo>> {
+        if self.init_building_object(){
+            return None;
         }
 
         let mut updated_structures = false;
@@ -366,6 +406,7 @@ impl Manager {
                             self.new_structures_flag = 0;
                         }
                     }
+                    //Todo maybe need pop objects list
                     self.structures_lists[ScreepsObjectType::ConstructionSites as usize].pop();
                     continue;
                 }

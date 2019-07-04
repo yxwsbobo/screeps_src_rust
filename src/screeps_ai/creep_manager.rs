@@ -22,12 +22,13 @@ use screeps::Part;
 pub struct Manager {
     init_flag: bool,
     normal_body: &'static (&'static [Part], u32),
+//    total_creep_cost
     //key is id,
     //    sources_info:HashMap<String,EnergySourceInfo>,
     //    level:usize,
 }
 
-const NORMAL_CREEP_BODY: ([Part; 4], [Part; 6], [Part; 12]) = (
+const NORMAL_CREEP_BODY: ([Part; 4], [Part; 6], [Part; 14]) = (
     [Part::Work, Part::Work, Part::Carry, Part::Move],
     [
         Part::Work,
@@ -46,6 +47,8 @@ const NORMAL_CREEP_BODY: ([Part; 4], [Part; 6], [Part; 12]) = (
         Part::Work,
         Part::Carry,
         Part::Carry,
+        Part::Carry,
+        Part::Move,
         Part::Move,
         Part::Move,
         Part::Move,
@@ -56,7 +59,7 @@ const NORMAL_CREEP_BODY: ([Part; 4], [Part; 6], [Part; 12]) = (
 const NORMAL_CREEP_BODY_INFO: [(&[Part], u32); 3] = [
     (&NORMAL_CREEP_BODY.0, 300),
     (&NORMAL_CREEP_BODY.1, 500),
-    (&NORMAL_CREEP_BODY.2, 900),
+    (&NORMAL_CREEP_BODY.2, 1000),
 ];
 
 impl Manager {
