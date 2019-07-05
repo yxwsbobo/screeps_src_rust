@@ -76,4 +76,6 @@ pub struct Manager {
     current_number: usize,
     max_number: usize,
     offer_level: i32,
+    room_name:String,
+    fight_flag:bool,
 }

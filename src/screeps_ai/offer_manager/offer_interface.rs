@@ -1,8 +1,9 @@
 use core::borrow::BorrowMut;
-use screeps_ai::creep_manager;
+use screeps_ai::{creep_manager, get_object_manager};
 use screeps_ai::offer_manager::{GroupEmployInfo, Manager, WorkerState};
 use std::collections::BTreeMap;
 use std::rc::Rc;
+use screeps_ai::object_manager::ScreepsObjectType;
 
 pub fn get_offer_mut(offer: &Rc<GroupEmployInfo>) -> &mut GroupEmployInfo {
     {
@@ -16,20 +17,26 @@ impl Manager {
             offer_list: BTreeMap::new(),
             current_number: 0,
             max_number: 0,
-            offer_level: 0
+            offer_level: 0,
+            room_name: Default::default(),
+            fight_flag: false
         }
     }
 
-    fn compute_game_level() -> i32{
-
+    fn compute_game_level(&self) -> i32{
+        let extension_number = get_object_manager().structures_lists[ScreepsObjectType::Extension as usize].len();
+        match extension_number {
+            0 ..= 9 => 0,
+            10 ..= 20 => 1,
+            _ => 2,
+        }
     }
 
     pub fn check_offer_level(&mut self) ->bool{
-        let game_level = Manager::compute_game_level();
+        let game_level = self.compute_game_level();
         if self.offer_level != game_level {
             self.offer_level = game_level;
-
-
+            self.init_offer_and_worker();
             true
         }
         else{
@@ -37,9 +44,19 @@ impl Manager {
         }
     }
 
-    pub fn init(&mut self) -> bool {
+    fn init_offer_and_worker(&mut self){
         self.init_default_offers();
         self.init_worker_action();
+    }
+
+    pub fn init(&mut self) -> bool {
+        for room in &screeps::game::rooms::values() {
+            self.room_name = room.name();
+            break;
+        }
+        self.offer_level = self.compute_game_level();
+
+        self.init_offer_and_worker();
         true
     }
 

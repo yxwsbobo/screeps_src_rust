@@ -1,11 +1,14 @@
 mod basic_offers;
+mod level0_offer;
+mod level1_offer;
+mod level2_offer;
 use screeps::{HasId, OwnedStructureProperties};
 use screeps_ai::object_manager::{ObjectBasicInfo, ScreepsObjectType};
 use screeps_ai::offer_manager::offer_interface::get_offer_mut;
 use screeps_ai::offer_manager::{
     ActionType, GroupEmployInfo, Manager, PointToPointWorkInfo, WorkType,
 };
-use screeps_ai::{get_object_manager, get_offer_manager, object_manager};
+use screeps_ai::{get_object_manager, get_offer_manager, object_manager, middle_time};
 use std::rc::Rc;
 use screeps_ai::offer_manager::default_offer::basic_offers::{BASIC_UPGRADE_OFFER_LEVEL, BASIC_BUILD_OFFER_LEVEL, BASIC_NORMAL_TRANSFER_OFFER_LEVEL};
 
@@ -36,31 +39,31 @@ impl Manager {
         let offers = self.offer_list.entry(level).or_default();
         offers.push(Rc::new(employ_info));
     }
-
-    fn init_spawn_offer(&mut self) {
-        for spawn in get_object_manager().get_structures(ScreepsObjectType::Spawn) {
-            self.add_target_offer_use_source(
-                11,
-                spawn.id.clone(),
-                ActionType::Transfer(screeps::constants::ResourceType::Energy),
-                6,
-            );
-        }
-    }
-
-    fn init_extensions_offer(&mut self) {
-        let employ_info = Manager::new_extension_employ(6);
-
-        let offers = self.offer_list.entry(1).or_default();
-        offers.push(employ_info);
-    }
-
-    fn init_transfer_offer(&mut self){
-        let employ_info = Manager::new_normal_transfer_employ(3);
-
-        let offers = self.offer_list.entry(20).or_default();
-        offers.push(employ_info);
-    }
+//
+//    fn init_spawn_offer(&mut self) {
+//        for spawn in get_object_manager().get_structures(ScreepsObjectType::Spawn) {
+//            self.add_target_offer_use_source(
+//                11,
+//                spawn.id.clone(),
+//                ActionType::Transfer(screeps::constants::ResourceType::Energy),
+//                6,
+//            );
+//        }
+//    }
+//
+//    fn init_extensions_offer(&mut self) {
+//        let employ_info = Manager::new_extension_employ(6);
+//
+//        let offers = self.offer_list.entry(1).or_default();
+//        offers.push(employ_info);
+//    }
+//
+//    fn init_transfer_offer(&mut self){
+//        let employ_info = Manager::new_normal_transfer_employ(3);
+//
+//        let offers = self.offer_list.entry(20).or_default();
+//        offers.push(employ_info);
+//    }
 
     fn init_workers_number(&mut self) {
         self.max_number = 0;
@@ -71,40 +74,45 @@ impl Manager {
         }
     }
 
-    fn init_pausing_do(&mut self) {
-        let spawn_level = 11;
-        let extensions_level = 1;
-        let transfer_level = 20;
-        for offer in self.offer_list.get(&spawn_level).expect("impossible in temp pausing") {
-            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_UPGRADE_OFFER_LEVEL));
-        }
-
-        for offer in self.offer_list.get(&extensions_level).expect("impossible in temp pausing2") {
-            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_NORMAL_TRANSFER_OFFER_LEVEL));
-        }
-
-//        for offer in self.offer_list.get(&transfer_level).expect("impossible in temp pausing3") {
-//            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_BUILD_OFFER_LEVEL));
+//    fn init_pausing_do(&mut self) {
+//        let spawn_level = 11;
+//        let extensions_level = 1;
+//        let transfer_level = 20;
+//        for offer in self.offer_list.get(&spawn_level).expect("impossible in temp pausing") {
+//            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_UPGRADE_OFFER_LEVEL));
 //        }
-    }
+//
+//        for offer in self.offer_list.get(&extensions_level).expect("impossible in temp pausing2") {
+//            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_NORMAL_TRANSFER_OFFER_LEVEL));
+//        }
+//
+////        for offer in self.offer_list.get(&transfer_level).expect("impossible in temp pausing3") {
+////            Manager::connect_employ_on_pausing(offer,&self.get_basic_employ(BASIC_BUILD_OFFER_LEVEL));
+////        }
+//    }
 
     pub fn init_default_offers(&mut self) {
+        self.offer_list.clear();
         self.init_basic_offer();
 
-        self.init_spawn_offer();
-        self.init_extensions_offer();
-//        self.init_transfer_offer();
+        match self.offer_level {
+            0 =>{
+                info!("use offer 0");
+                self.init_offer_level0();
+            }
+            1 =>{
+                info!("use offer 1");
+                self.init_offer_level1();
+            }
+            2 =>{
+                info!("use offer 2");
+                self.init_offer_level2();
+            }
 
-        self.init_pausing_do();
-
-        //        self.init_extensions_offer();
-        //
-        //        self.init_controller_offer();
-        //
-        //        self.init_build_offer();
-        //
-        //        self.init_pausing_do();
-
+            _ =>{
+                warn!("unknown offer");
+            }
+        }
         self.init_workers_number();
     }
 
@@ -152,7 +160,14 @@ impl Manager {
         }
     }
 
+    fn check_and_set_fight(&mut self){
+
+    }
+
     pub fn set_offer_state(&mut self) {
+        if middle_time() {
+            self.check_and_set_fight();
+        }
         for offers in self.offer_list.values_mut() {
             for offer in offers {
                 let offer = get_offer_mut(offer);

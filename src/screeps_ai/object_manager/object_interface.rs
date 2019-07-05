@@ -50,6 +50,7 @@ impl Manager {
     }
 
     fn init_structures(&mut self) {
+        info!("in init_structures");
         let structures: &Vec<screeps::objects::Structure> = &screeps::game::structures::values();
 
         for structure in structures {
@@ -406,6 +407,7 @@ impl Manager {
                             self.new_structures_flag = 0;
                         }
                     }
+                    info!("pop sturct: {}", self.new_structures_flag );
                     //Todo maybe need pop objects list
                     self.structures_lists[ScreepsObjectType::ConstructionSites as usize].pop();
                     continue;

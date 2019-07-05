@@ -50,7 +50,7 @@ pub struct Manager {
     objects: HashMap<String, Rc<ObjectBasicInfo>>,
     room_objects: HashMap<String, Rc<screeps::objects::RoomObject>>,
 
-    structures_lists: [Vec<Rc<ObjectBasicInfo>>; ScreepsObjectType::LastFlag as usize],
+    pub structures_lists: [Vec<Rc<ObjectBasicInfo>>; ScreepsObjectType::LastFlag as usize],
 
     source_range: HashMap<String, Vec<Rc<ObjectBasicInfo>>>,
 

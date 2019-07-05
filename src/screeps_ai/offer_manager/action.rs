@@ -4,11 +4,13 @@ mod p2p_work;
 
 use super::Manager;
 
-use screeps_ai::get_offer_manager;
+use screeps_ai::{get_offer_manager, get_object_manager};
 use screeps_ai::offer_manager::offer_interface::get_offer_mut;
 use screeps_ai::offer_manager::{WorkType, WorkerState};
 use std::collections::HashMap;
 use std::rc::Rc;
+use screeps_ai::object_manager::{ScreepsObjectType, ObjectBasicInfo};
+use screeps::{find,HasPosition};
 
 impl Manager {
     fn init_workers(&mut self) {
@@ -76,7 +78,24 @@ impl Manager {
         };
     }
 
+//    fn find_enemy(&self, tower: &Rc<screeps::objects::RoomObject>)-> Option<Rc<screeps::objects::Creep>>{
+//        tower.pos().find_closest_by_range(find::HOSTILE_CREEPS)
+//    }
+
+    fn do_fight(&mut self){
+//        for tower in &get_object_manager().structures_lists[ScreepsObjectType::Tower as usize] {
+//            let tower_obj = get_object_manager().get_game_object(&tower.id).unwrap();
+//            if let Some(v) = self.find_enemy(&tower_obj){
+//                tower_obj.attack(&*v);
+//            }
+//        }
+    }
+
     pub fn creeps_do_work(&mut self) {
+        if self.fight_flag {
+            self.do_fight();
+        }
+
         let creeps: HashMap<String, screeps::objects::Creep> = screeps::game::creeps::keys()
             .into_iter()
             .zip(screeps::game::creeps::values().into_iter())
